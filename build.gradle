@@ -1,0 +1,14 @@
+plugins {
+    id 'java'
+}
+
+group = 'de.borstelmann.doorbell'
+version = '0.0.1-SNAPSHOT'
+
+subprojects {
+    sourceCompatibility = '17'
+
+    repositories {
+        mavenCentral()
+    }
+}
