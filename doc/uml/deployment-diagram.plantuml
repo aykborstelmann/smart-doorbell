@@ -1,0 +1,25 @@
+@startuml
+
+rectangle "Smart Devices" {
+    node "Door Buzzer (ESP)" as doorbellbuzzer
+    node "Doorbell (ESP)" as doorbell
+}
+cloud "Google Cloud" as gc
+node "Client" as client {
+    component Frontend as frontend
+}
+node Server as server {
+    component Backend as backend
+    database DB
+    interface "Google Home" as gh
+    backend - DB
+    backend --( gh
+}
+
+client <--> server : "Webhooks & HTTP""
+gc --- server : "Webhooks & HTTP"
+doorbellbuzzer <- server : "Webhooks & HTTP"
+doorbell --> server : "Webhooks & HTTP"
+
+
+@enduml
