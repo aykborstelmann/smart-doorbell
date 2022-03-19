@@ -6,3 +6,4 @@ gradle-app.setting
 .idea/
 *.iml
 *.bin
+smart-doorbell.json
