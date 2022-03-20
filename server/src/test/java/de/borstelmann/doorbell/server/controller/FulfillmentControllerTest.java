@@ -1,6 +1,5 @@
 package de.borstelmann.doorbell.server.controller;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -11,7 +10,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.util.List;
 import java.util.Map;
@@ -46,7 +44,10 @@ class FulfillmentControllerTest {
         doReturn(CompletableFuture.completedFuture(expectedResponse))
                 .when(doorbellSmartHomeApp).handleRequest(eq(requestBody), headersCaptor.capture());
 
-        final MockHttpServletResponse response = mockMvc.perform(createFulfillmentRequest(requestBody, headers))
+        final MockHttpServletResponse response = mockMvc.perform(post("/api/v1/fulfillment")
+                        .headers(headers)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
                 .andExpect(status().isOk())
                 .andReturn().getResponse();
 
@@ -54,14 +55,6 @@ class FulfillmentControllerTest {
         assertThat(responseBody).isEqualTo(expectedResponse);
         assertThat(response.getContentType()).isEqualTo(MediaType.APPLICATION_JSON_VALUE);
         assertThat(headersCaptor.getValue()).containsEntry("Key", "Value");
-    }
-
-    @NotNull
-    private MockHttpServletRequestBuilder createFulfillmentRequest(String requestBody, HttpHeaders headers) {
-        return post("/api/v1/fulfillment")
-                .headers(headers)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody);
     }
 
 }

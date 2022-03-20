@@ -21,6 +21,7 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'de.cronn:validation-file-assertions:0.2.0'
 }
 
 tasks.named('test') {

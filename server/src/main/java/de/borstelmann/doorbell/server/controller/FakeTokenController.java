@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/faketoken")
 public class FakeTokenController {
 
-    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TokenResponse> postFakeToken(@RequestParam("grant_type") String grantType) {
         TokenResponseBuilder tokenResponse = TokenResponse.builder()
                 .tokenType("bearer")
