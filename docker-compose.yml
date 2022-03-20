@@ -1,0 +1,22 @@
+version: '3.3'
+
+services:
+
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: doorbell_db
+      POSTGRES_USER: doorbell_user
+      POSTGRES_PASSWORD: doorbell_pw
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: doorbell@borstelmann.de
+      PGADMIN_DEFAULT_PASSWORD: doorbell_pw
+    ports:
+      - "8088:80"

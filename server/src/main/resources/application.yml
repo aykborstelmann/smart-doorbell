@@ -1,5 +1,13 @@
 spring:
   application:
     name: smart-doorbell-server
+  datasource:
+    url: jdbc:postgresql://localhost:5432/doorbell_db
+    username: doorbell_user
+    password: doorbell_pw
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
 server:
   port: 8080
