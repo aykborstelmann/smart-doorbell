@@ -1,7 +1,18 @@
+buildscript {
+    repositories {
+        mavenLocal()
+    }
+    dependencies {
+        classpath "org.openapitools:openapi-generator-gradle-plugin:5.4.0"
+    }
+}
+
 plugins {
+    id 'java'
+    id 'idea'
     id 'org.springframework.boot' version '2.6.4'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'java'
+    id 'org.openapi.generator' version '5.4.0'
 }
 
 configurations {
@@ -11,9 +22,13 @@ configurations {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'com.google.actions:actions-on-google:1.8.0'
+    implementation 'io.swagger.core.v3:swagger-annotations:2.1.13'
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.2'
+
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
     compileOnly 'org.projectlombok:lombok'
@@ -27,3 +42,40 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+final String OUTPUT_DIR = "$buildDir/generated".toString()
+
+sourceSets {
+    main {
+        java {
+            srcDir(OUTPUT_DIR)
+        }
+    }
+}
+
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+
+task codeGen(type: GenerateTask) {
+    generatorName.set("spring")
+    inputSpec.set("$parent.projectDir/doc/api/api.yaml")
+    outputDir.set(OUTPUT_DIR)
+
+
+    additionalProperties.set([
+            interfaceOnly       : 'true',
+            sourceFolder        : '',
+            skipDefaultInterface: 'true',
+            useTags             : 'true'
+    ])
+
+    globalProperties.set([
+            apis           : '',
+            models         : '',
+            supportingFiles: 'false'
+    ])
+
+    apiPackage.set('de.borstelmann.doorbell.server.openapi.api')
+    modelPackage.set('de.borstelmann.doorbell.server.openapi.model')
+}
+
+compileJava.dependsOn(codeGen)
