@@ -53,4 +53,24 @@ public class RequestUtils {
     public static RequestBuilder createDeleteUserRequest(long userId) {
         return delete("/api/v1/users/{userId}", userId);
     }
+
+    @NotNull
+    public static RequestBuilder createCreateDoorbellRequest(long userId, String doorbellRequest) {
+        return post("/api/v1/users/{userId}/doorbells", userId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(doorbellRequest);
+    }
+
+    public static RequestBuilder createGetAllDoorbellsRequest(long userId) {
+        return get("/api/v1/users/{userId}/doorbells", userId);
+    }
+
+    public static RequestBuilder createGetDoorbellRequest(long doorbellId) {
+        return get("/api/v1/doorbells/{doorbellId}", doorbellId);
+    }
+
+    public static RequestBuilder createDeleteDoorbellRequest(long doorbellId) {
+        return delete("/api/v1/doorbells/{doorbellId}", doorbellId);
+    }
+
 }

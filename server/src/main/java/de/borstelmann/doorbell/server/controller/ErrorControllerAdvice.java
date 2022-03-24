@@ -1,5 +1,6 @@
 package de.borstelmann.doorbell.server.controller;
 
+import de.borstelmann.doorbell.server.error.BadRequestException;
 import de.borstelmann.doorbell.server.error.NotFoundException;
 import de.borstelmann.doorbell.server.openapi.model.ErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,15 @@ public class ErrorControllerAdvice {
 
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
+                .body(errorResponse);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponse> handleNotBadException(Exception e) {
+        ErrorResponse errorResponse = convertToErrorResponse(e);
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
                 .body(errorResponse);
     }
 
