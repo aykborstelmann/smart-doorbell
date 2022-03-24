@@ -3,10 +3,10 @@ package de.borstelmann.doorbell.server.controller;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 public class RequestUtils {
     @NotNull
@@ -30,5 +30,27 @@ public class RequestUtils {
                 .headers(headers)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody);
+    }
+
+    @NotNull
+    public static MockHttpServletRequestBuilder createCreateUserRequest(String userRequest) {
+        return post("/api/v1/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(userRequest);
+    }
+
+    @NotNull
+    public static RequestBuilder createGetAllUsersRequest() {
+        return get("/api/v1/users");
+    }
+
+    @NotNull
+    public static RequestBuilder createGetUserByIdRequest(long userId) {
+        return get("/api/v1/users/{userId}", userId);
+    }
+
+    @NotNull
+    public static RequestBuilder createDeleteUserRequest(long userId) {
+        return delete("/api/v1/users/{userId}", userId);
     }
 }

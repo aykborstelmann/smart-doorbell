@@ -28,6 +28,8 @@ dependencies {
     implementation 'com.google.actions:actions-on-google:1.8.0'
     implementation 'io.swagger.core.v3:swagger-annotations:2.1.13'
     implementation 'org.openapitools:jackson-databind-nullable:0.2.2'
+    implementation 'org.modelmapper:modelmapper:3.0.0'
+
 
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
