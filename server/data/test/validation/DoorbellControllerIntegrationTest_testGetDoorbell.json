@@ -1,0 +1,7 @@
+{
+  "id" : 1,
+  "name" : "Doorbell",
+  "is_opened" : true,
+  "is_connected" : false,
+  "last_notified" : "2020-03-30T17:08:00+02:00"
+}
