@@ -1,8 +1,10 @@
 package de.borstelmann.doorbell.server.domain.model;
 
 import lombok.*;
+import lombok.experimental.Accessors;
 
 import javax.persistence.*;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
@@ -20,10 +22,14 @@ public class DoorbellDevice {
     @ManyToOne(optional = false)
     private User user;
 
-    @OneToOne
-    private DoorbellBuzzer doorbellBuzzer;
+    private String name;
 
-    @OneToOne
-    private DoorbellNotifier doorbellNotifier;
+    @Builder.Default
+    private Boolean isConnected = false;
+
+    @Builder.Default
+    private Boolean isOpened = false;
+
+    private OffsetDateTime lastNotified;
     
 }
