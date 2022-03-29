@@ -73,4 +73,11 @@ public class RequestUtils {
         return delete("/api/v1/doorbells/{doorbellId}", doorbellId);
     }
 
+    public static RequestBuilder createOpenDoorbellRequest(long doorbellId) {
+        return post("/api/v1/doorbells/{doorbellId}/open", doorbellId);
+    }
+
+    public static RequestBuilder createCloseDoorbellRequest(long doorbellId) {
+        return post("/api/v1/doorbells/{doorbellId}/close", doorbellId);
+    }
 }
