@@ -3,8 +3,8 @@ package de.borstelmann.doorbell.server.systemtest;
 import de.borstelmann.doorbell.server.controller.RequestUtils;
 import de.borstelmann.doorbell.server.domain.model.DoorbellDevice;
 import de.borstelmann.doorbell.server.domain.model.User;
-import de.borstelmann.doorbell.server.test.SpringIntegrationTest;
-import de.borstelmann.doorbell.server.test.StompConfig;
+import de.borstelmann.doorbell.server.test.authentication.OAuthIntegrationTest;
+import de.borstelmann.doorbell.server.test.websocket.StompConfig;
 import de.borstelmann.doorbell.server.test.UnitTestClock;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 @Import(StompConfig.class)
-public class DoorbellBuzzerSystemTest extends SpringIntegrationTest {
+public class DoorbellBuzzerSystemTest extends OAuthIntegrationTest {
 
     @LocalServerPort
     private Integer localServerPort;
@@ -34,11 +34,13 @@ public class DoorbellBuzzerSystemTest extends SpringIntegrationTest {
 
     private DoorbellBuzzerSimulator doorbellBuzzerSimulator;
     private DoorbellDevice sampleDoorbellDevice;
+    private String bearer;
 
     @BeforeEach
     void setUp() throws ExecutionException, InterruptedException {
         User sampleUser = createSampleUser();
         sampleDoorbellDevice = createSampleDoorbellDevice(sampleUser);
+        bearer = obtainToken();
 
         doorbellBuzzerSimulator = new DoorbellBuzzerSimulator(stompClient, webSocketUrl(), clock);
         doorbellBuzzerSimulator.connect(String.valueOf(sampleDoorbellDevice.getId()));
@@ -53,17 +55,17 @@ public class DoorbellBuzzerSystemTest extends SpringIntegrationTest {
 
     @Test
     void testOpenViaApi() throws Exception {
-        mockMvc.perform(RequestUtils.createOpenDoorbellRequest(sampleDoorbellDevice.getId()));
+        mockMvc.perform(RequestUtils.createOpenDoorbellRequest(sampleDoorbellDevice.getId(), bearer));
         await().untilAsserted(() -> {
             assertThat(doorbellBuzzerSimulator.isOpen()).isTrue();
-            mockMvc.perform(RequestUtils.createGetDoorbellRequest(sampleDoorbellDevice.getId()))
+            mockMvc.perform(RequestUtils.createGetDoorbellRequest(sampleDoorbellDevice.getId(), bearer))
                     .andExpect(this::assertWithFormattedJsonFile);
         });
     }
 
     @Test
     void testOpenAndWaitViaApi() throws Exception {
-        mockMvc.perform(RequestUtils.createOpenDoorbellRequest(sampleDoorbellDevice.getId()));
+        mockMvc.perform(RequestUtils.createOpenDoorbellRequest(sampleDoorbellDevice.getId(), bearer));
         await().untilAsserted(() ->
                 assertThat(doorbellBuzzerSimulator.isOpen()).isTrue()
         );
@@ -71,21 +73,21 @@ public class DoorbellBuzzerSystemTest extends SpringIntegrationTest {
         doorbellBuzzerSimulator.loop();
         assertThat(doorbellBuzzerSimulator.isOpen()).isFalse();
         await().untilAsserted(() ->
-                mockMvc.perform(RequestUtils.createGetDoorbellRequest(sampleDoorbellDevice.getId()))
+                mockMvc.perform(RequestUtils.createGetDoorbellRequest(sampleDoorbellDevice.getId(), bearer))
                         .andExpect(this::assertWithFormattedJsonFile)
         );
     }
 
     @Test
     void testOpenAndCloseViaApi() throws Exception {
-        mockMvc.perform(RequestUtils.createOpenDoorbellRequest(sampleDoorbellDevice.getId()));
+        mockMvc.perform(RequestUtils.createOpenDoorbellRequest(sampleDoorbellDevice.getId(), bearer));
         await().untilAsserted(() ->
                 assertThat(doorbellBuzzerSimulator.isOpen()).isTrue()
         );
-        mockMvc.perform(RequestUtils.createCloseDoorbellRequest(sampleDoorbellDevice.getId()));
+        mockMvc.perform(RequestUtils.createCloseDoorbellRequest(sampleDoorbellDevice.getId(), bearer));
         await().untilAsserted(() -> {
             assertThat(doorbellBuzzerSimulator.isOpen()).isFalse();
-            mockMvc.perform(RequestUtils.createGetDoorbellRequest(sampleDoorbellDevice.getId()))
+            mockMvc.perform(RequestUtils.createGetDoorbellRequest(sampleDoorbellDevice.getId(), bearer))
                     .andExpect(this::assertWithFormattedJsonFile);
         });
     }

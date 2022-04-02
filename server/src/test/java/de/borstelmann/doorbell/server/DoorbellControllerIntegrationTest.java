@@ -7,7 +7,7 @@ import de.borstelmann.doorbell.server.domain.repository.DoorbellDeviceRepository
 import de.borstelmann.doorbell.server.domain.repository.UserRepository;
 import de.borstelmann.doorbell.server.openapi.model.DoorbellRequest;
 import de.borstelmann.doorbell.server.openapi.model.DoorbellResponse;
-import de.borstelmann.doorbell.server.test.SpringIntegrationTest;
+import de.borstelmann.doorbell.server.test.authentication.OAuthIntegrationTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import java.time.ZoneOffset;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DoorbellControllerIntegrationTest extends SpringIntegrationTest {
+public class DoorbellControllerIntegrationTest extends OAuthIntegrationTest {
 
     public static final OffsetDateTime SAMPLE_DATE_TIME = OffsetDateTime.of(2020, 3, 30, 15, 8, 0, 0, ZoneOffset.UTC);
 
@@ -40,7 +40,7 @@ public class DoorbellControllerIntegrationTest extends SpringIntegrationTest {
         DoorbellRequest doorbellRequest = new DoorbellRequest().name("name");
         String body = objectMapper.writeValueAsString(doorbellRequest);
 
-        assertIsOkay(RequestUtils.createCreateDoorbellRequest(user.getId(), body))
+        assertIsOkay(RequestUtils.createCreateDoorbellRequest(user.getId(), body, obtainToken()))
                 .andExpect(result -> {
                     String responseBody = result.getResponse().getContentAsString();
                     DoorbellResponse doorbellResponse = objectMapper.readValue(responseBody, DoorbellResponse.class);
@@ -58,7 +58,7 @@ public class DoorbellControllerIntegrationTest extends SpringIntegrationTest {
         DoorbellRequest doorbellRequest = new DoorbellRequest().name("name");
         String body = objectMapper.writeValueAsString(doorbellRequest);
 
-        assertNotFound(RequestUtils.createCreateDoorbellRequest(0L, body));
+        assertNotFound(RequestUtils.createCreateDoorbellRequest(0L, body, obtainToken()));
 
         assertThat(doorbellDeviceRepository.findAll()).isEmpty();
     }
@@ -68,12 +68,12 @@ public class DoorbellControllerIntegrationTest extends SpringIntegrationTest {
         User user = createSampleUser();
         createSampleDoorbellDevice(user);
 
-        assertIsOkay(RequestUtils.createGetAllDoorbellsRequest(user.getId()));
+        assertIsOkay(RequestUtils.createGetAllDoorbellsRequest(user.getId(), obtainToken()));
     }
 
     @Test
     void testGetAllDoorbells_notFound() throws Exception {
-        assertNotFound(RequestUtils.createGetAllDoorbellsRequest(0L));
+        assertNotFound(RequestUtils.createGetAllDoorbellsRequest(0L, obtainToken()));
     }
 
     @Test
@@ -90,12 +90,12 @@ public class DoorbellControllerIntegrationTest extends SpringIntegrationTest {
 
         doorbellDeviceRepository.saveAndFlush(doorbell);
 
-        assertIsOkay(RequestUtils.createGetDoorbellRequest(doorbell.getId()));
+        assertIsOkay(RequestUtils.createGetDoorbellRequest(doorbell.getId(), obtainToken()));
     }
 
     @Test
     void testGetDoorbell_doorbellIdNotFound() throws Exception {
-        assertNotFound(RequestUtils.createGetDoorbellRequest(1L));
+        assertNotFound(RequestUtils.createGetDoorbellRequest(1L, obtainToken()));
     }
 
     @Test
@@ -103,12 +103,12 @@ public class DoorbellControllerIntegrationTest extends SpringIntegrationTest {
         User user = createSampleUser();
         DoorbellDevice doorbell = createSampleDoorbellDevice(user);
 
-        assertNoContent(RequestUtils.createDeleteDoorbellRequest(doorbell.getId()));
+        assertNoContent(RequestUtils.createDeleteDoorbellRequest(doorbell.getId(), obtainToken()));
     }
 
     @Test
     void testDeleteDoorbell_doorbellIdNotFound() throws Exception {
-        assertNotFound(RequestUtils.createDeleteDoorbellRequest(1L));
+        assertNotFound(RequestUtils.createDeleteDoorbellRequest(1L, obtainToken()));
     }
 
 }

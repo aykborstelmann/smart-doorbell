@@ -1,0 +1,9 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${wiremock.server.baseUrl}
+wiremock:
+  server:
+    baseUrl: http://localhost:${wiremock.server.port}

@@ -2,12 +2,16 @@ package de.borstelmann.doorbell.server.controller;
 
 import com.google.actions.api.smarthome.*;
 import com.google.auth.oauth2.GoogleCredentials;
+import de.borstelmann.doorbell.server.domain.model.security.CustomUserSession;
+import de.borstelmann.doorbell.server.domain.model.User;
+import de.borstelmann.doorbell.server.error.BadRequestException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class DoorbellSmartHomeApp extends SmartHomeApp {
@@ -49,8 +53,10 @@ public class DoorbellSmartHomeApp extends SmartHomeApp {
         syncResponse.requestId = syncRequest.requestId;
         syncResponse.payload = new SyncResponse.Payload();
 
-        String userId = (String) headers.get("authorization");
-        syncResponse.payload.agentUserId = userId;
+        User user = Optional.ofNullable(CustomUserSession.getCurrentUser())
+                .orElseThrow(() -> new BadRequestException("Current session does not have a user"));
+
+        syncResponse.payload.agentUserId = String.valueOf(user.getId());
         syncResponse.payload.devices = new SyncResponse.Payload.Device[]{};
         return syncResponse;
     }

@@ -1,4 +1,4 @@
-package de.borstelmann.doorbell.server.test;
+package de.borstelmann.doorbell.server.test.websocket;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.ApplicationListener;

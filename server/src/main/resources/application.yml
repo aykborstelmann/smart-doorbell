@@ -15,6 +15,13 @@ spring:
           time_zone: UTC
   jackson:
     time-zone: UTC
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER}
+auth0:
+  audience: ${AUDIENCE}
 server:
   port: 8080
 

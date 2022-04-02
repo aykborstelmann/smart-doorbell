@@ -17,6 +17,8 @@ servers:
 paths:
   /users:
     get:
+      security:
+        - OIDC: [ ]
       operationId: getAllUsers
       tags:
         - user
@@ -29,26 +31,12 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/components/schemas/UserResponse"
-    post:
-      operationId: createUser
-      tags:
-        - user
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UserRequest"
-      responses:
-        "200":
-          description: "Successful creation"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/UserResponse"
   /users/{userId}:
     parameters:
       - $ref: "#/components/parameters/UserId"
     get:
+      security:
+        - OIDC: [ ]
       operationId: getUserById
       tags:
         - user
@@ -62,6 +50,8 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
     delete:
+      security:
+        - OIDC: [ ]
       operationId: deleteUser
       tags:
         - user
@@ -74,6 +64,8 @@ paths:
     parameters:
       - $ref: "#/components/parameters/UserId"
     get:
+      security:
+        - OIDC: [ ]
       operationId: getAllDoorbells
       tags:
         - doorbell
@@ -86,11 +78,11 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/DoorbellResponse"
-        "400":
-          $ref: "#/components/responses/Invalid"
         "404":
           $ref: "#/components/responses/NotFound"
     post:
+      security:
+        - OIDC: [ ]
       operationId: createDoorbell
       tags:
         - doorbell
@@ -106,14 +98,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DoorbellResponse"
-        "400":
-          $ref: "#/components/responses/Invalid"
         "404":
           $ref: "#/components/responses/NotFound"
   /doorbells/{doorbellId}:
     parameters:
       - $ref: "#/components/parameters/DoorbellId"
     get:
+      security:
+        - OIDC: [ ]
       operationId: getDoorbell
       tags:
         - doorbell
@@ -127,6 +119,8 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
     delete:
+      security:
+        - OIDC: [ ]
       operationId: deleteDoorbell
       tags:
         - doorbell
@@ -137,6 +131,8 @@ paths:
           $ref: "#/components/responses/NotFound"
   /doorbells/{doorbellId}/open:
     post:
+      security:
+        - OIDC: [ ]
       operationId: openDoor
       tags:
         - doorbell_buzzer
@@ -149,6 +145,8 @@ paths:
           $ref: "#/components/responses/NotFound"
   /doorbells/{doorbellId}/close:
     post:
+      security:
+        - OIDC: [ ]
       operationId: closeDoor
       tags:
         - doorbell_buzzer
@@ -163,6 +161,8 @@ paths:
     parameters:
       - $ref: "#/components/parameters/DoorbellId"
     post:
+      security:
+        - OIDC: [ ]
       operationId: notify
       tags:
         - notification
@@ -197,19 +197,12 @@ components:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
   schemas:
-    UserRequest:
-      type: object
-      properties:
-        name:
-          type: string
     UserResponse:
       type: object
       properties:
         id:
           type: integer
           format: int64
-        name:
-          type: string
     DoorbellRequest:
       type: object
       properties:
@@ -235,3 +228,7 @@ components:
       properties:
         message:
           type: string
+  securitySchemes:
+    OIDC:
+      type: "openIdConnect"
+      openIdConnectUrl: https://dev-gh2pzn93.us.auth0.com/.well-known/openid-configuration

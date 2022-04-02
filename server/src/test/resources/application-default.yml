@@ -8,3 +8,5 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: create-drop
+JWT_ISSUER: http://issuer/
+AUDIENCE: http://localhost:8080

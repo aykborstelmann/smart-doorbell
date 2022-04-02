@@ -1,30 +1,35 @@
 package de.borstelmann.doorbell.server.controller;
 
 import com.google.actions.api.smarthome.*;
-import com.google.auth.oauth2.GoogleCredentials;
+import de.borstelmann.doorbell.server.test.authentication.WithMockOAuth2Scope;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SpringJUnitConfig(DoorbellSmartHomeApp.class)
 class DoorbellSmartHomeAppTest {
     private static final String REQUEST_ID = "1";
-    private static final String AGENT_USER_ID = "Bearer test";
-    private static final Map<String, String> HEADERS = Map.of("authorization", AGENT_USER_ID);
+    private static final long AGENT_USER_ID = 1L;
+    public static final Map<Object, Object> EMPTY_HEADERS = Map.of();
 
-    private final DoorbellSmartHomeApp doorbellSmartHomeApp = new DoorbellSmartHomeApp();
+    @Autowired
+    private DoorbellSmartHomeApp doorbellSmartHomeApp;
 
     @Test
+    @WithMockOAuth2Scope(userId = AGENT_USER_ID)
     void testOnSync() {
         SyncRequest syncRequest = new SyncRequest();
         syncRequest.requestId = REQUEST_ID;
 
-        SyncResponse syncResponse = doorbellSmartHomeApp.onSync(syncRequest, HEADERS);
+        SyncResponse syncResponse = doorbellSmartHomeApp.onSync(syncRequest, EMPTY_HEADERS);
 
         assertThat(syncResponse.requestId).isEqualTo(REQUEST_ID);
         assertThat(syncResponse.payload).isNotNull();
-        assertThat(syncResponse.payload.agentUserId).isEqualTo(AGENT_USER_ID);
+        assertThat(syncResponse.payload.agentUserId).isEqualTo(String.valueOf(AGENT_USER_ID));
         assertThat(syncResponse.payload.devices).isEmpty();
     }
 
@@ -33,7 +38,7 @@ class DoorbellSmartHomeAppTest {
         ExecuteRequest executeRequest = new ExecuteRequest();
         executeRequest.requestId = REQUEST_ID;
 
-        ExecuteResponse executeResponse = doorbellSmartHomeApp.onExecute(executeRequest, HEADERS);
+        ExecuteResponse executeResponse = doorbellSmartHomeApp.onExecute(executeRequest, EMPTY_HEADERS);
 
         assertThat(executeResponse.requestId).isEqualTo(REQUEST_ID);
         assertThat(executeResponse.payload).isNotNull();
@@ -45,7 +50,7 @@ class DoorbellSmartHomeAppTest {
         QueryRequest queryRequest = new QueryRequest();
         queryRequest.requestId = REQUEST_ID;
 
-        QueryResponse queryResponse = doorbellSmartHomeApp.onQuery(queryRequest, HEADERS);
+        QueryResponse queryResponse = doorbellSmartHomeApp.onQuery(queryRequest, EMPTY_HEADERS);
 
         assertThat(queryResponse.requestId).isEqualTo(REQUEST_ID);
         assertThat(queryResponse.payload).isNotNull();

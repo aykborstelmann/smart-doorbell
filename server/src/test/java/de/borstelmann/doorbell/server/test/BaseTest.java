@@ -5,16 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.cronn.assertions.validationfile.junit5.JUnit5ValidationFileAssertions;
 import de.cronn.assertions.validationfile.normalization.ValidationNormalizer;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.UnsupportedEncodingException;
 
 public abstract class BaseTest implements JUnit5ValidationFileAssertions {
-
-    @Autowired
-    protected MockMvc mockMvc;
 
     public void assertWithFormattedJsonFile(String responseBody) {
         assertWithJsonFile(formatJson(responseBody));

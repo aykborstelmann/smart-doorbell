@@ -1,33 +1,19 @@
 package de.borstelmann.doorbell.server;
 
-import de.borstelmann.doorbell.server.test.SpringIntegrationTest;
+import de.borstelmann.doorbell.server.test.authentication.OAuthIntegrationTest;
+import de.cronn.assertions.validationfile.normalization.IdNormalizer;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.util.Collections;
+import static de.borstelmann.doorbell.server.controller.RequestUtils.createFulfillmentRequest;
 
-import static de.borstelmann.doorbell.server.controller.RequestUtils.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-public class GoogleHomeIntegrationTest extends SpringIntegrationTest {
-
-    @Test
-    void testAuthentication() throws Exception {
-        mockMvc.perform(createFakeAuthRequest("https://redirect/", "state"))
-                .andExpect(status().isMovedPermanently())
-                .andExpect(MockMvcResultMatchers.redirectedUrl("https://redirect/?code=xxxxxx&state=state"));
-    }
-
-    @Test
-    void testToken() throws Exception {
-        mockMvc.perform(createFakeTokenRequest("authorization_code"))
-                .andExpect(status().isOk())
-                .andExpect(this::assertWithFormattedJsonFile);
-    }
+public class GoogleHomeIntegrationTest extends OAuthIntegrationTest {
 
     @Test
     void testFulfillment() throws Exception {
+        createSampleUser();
+
         String fulfillmentRequest = """
                         {
                             "requestId": "ff36a3cc-ec34-11e6-b1a0-64510650abcf",
@@ -38,11 +24,14 @@ public class GoogleHomeIntegrationTest extends SpringIntegrationTest {
                 """;
 
         HttpHeaders headers = new HttpHeaders();
-        headers.put("authorization", Collections.singletonList("Bearer ACCESS_TOKEN"));
+        String oAuth2 = obtainToken();
+        headers.setBearerAuth(oAuth2);
+        assertIsOkay(createFulfillmentRequest(fulfillmentRequest, headers), getAgentUserIdNormalizer());
+    }
 
-        mockMvc.perform(createFulfillmentRequest(fulfillmentRequest, headers))
-                .andExpect(status().isOk())
-                .andExpect(this::assertWithFormattedJsonFile);
+    @NotNull
+    private IdNormalizer getAgentUserIdNormalizer() {
+        return new IdNormalizer("\"agentUserId\"\\s?:\\s?\"(\\d+)\"");
     }
 
 }

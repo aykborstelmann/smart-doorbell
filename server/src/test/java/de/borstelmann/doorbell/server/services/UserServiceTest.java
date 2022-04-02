@@ -5,6 +5,7 @@ import de.borstelmann.doorbell.server.domain.repository.UserRepository;
 import de.borstelmann.doorbell.server.error.NotFoundException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -15,7 +16,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @MockitoSettings
 class UserServiceTest {
@@ -27,32 +29,13 @@ class UserServiceTest {
     private UserService userService;
 
     @Test
-    void testCreateUser() {
-        User userToSave = User.builder()
-                .name("username")
-                .build();
-
-        User userToReturn = User.builder()
-                .id(0L)
-                .name("username")
-                .build();
-
-        Mockito.when(userRepository.save(userToSave)).thenReturn(userToReturn);
-
-        User createdUser = userService.createUser(userToSave);
-        assertThat(createdUser).isEqualTo(userToReturn);
-    }
-
-    @Test
     void testGetAllUsers() {
         List<User> usersToReturn = List.of(
                 User.builder()
                         .id(0L)
-                        .name("username")
                         .build(),
                 User.builder()
                         .id(1L)
-                        .name("username1")
                         .build()
         );
 
@@ -67,7 +50,6 @@ class UserServiceTest {
     void testGetUserById() {
         User userToReturn = User.builder()
                 .id(0L)
-                .name("username")
                 .build();
 
         Mockito.when(userRepository.findById(0L)).thenReturn(Optional.of(userToReturn));
@@ -100,5 +82,24 @@ class UserServiceTest {
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("User with ID 0 not found");
         Mockito.verify(userRepository, never()).deleteById(0L);
+    }
+
+    @Test
+    void testGetOrCreateUserByOAuthId() {
+        String oAuthId = "oAuthId";
+        doAnswer(inv -> {
+            User user = inv.getArgument(0, User.class);
+            user.setId(0L);
+            return user;
+        }).when(userRepository).save(any());
+
+        userService.getOrCreateUserByOAuthId(oAuthId);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+
+        assertThat(userCaptor.getValue())
+                .extracting(User::getOAuthId)
+                .isEqualTo(oAuthId);
     }
 }
