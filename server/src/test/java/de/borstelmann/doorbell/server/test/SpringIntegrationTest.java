@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -21,6 +22,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public abstract class SpringIntegrationTest extends BaseTest {
 
+    public static final String SAMPLE_OAUTH_ID = "oauthId";
+
+    @Autowired
+    protected MockMvc mockMvc;
     @Autowired
     protected ObjectMapper objectMapper;
     @Autowired
@@ -55,9 +60,13 @@ public abstract class SpringIntegrationTest extends BaseTest {
     }
 
     protected ResultActions assertIsOkay(RequestBuilder createDoorbellBuzzerRequest) throws Exception {
+        return assertIsOkay(createDoorbellBuzzerRequest, null);
+    }
+
+    protected ResultActions assertIsOkay(RequestBuilder createDoorbellBuzzerRequest, ValidationNormalizer validationNormalizer) throws Exception {
         return mockMvc.perform(createDoorbellBuzzerRequest)
                 .andExpect(status().isOk())
-                .andExpect(this::assertWithFormattedJsonFile);
+                .andExpect(result -> assertWithFormattedJsonFile(result, validationNormalizer));
     }
 
     protected void assertBadRequest(RequestBuilder request, ValidationNormalizer validationNormalizer) throws Exception {
@@ -89,7 +98,7 @@ public abstract class SpringIntegrationTest extends BaseTest {
 
     protected User createSampleUser() {
         User user = User.builder()
-                .name("name")
+                .oAuthId(SAMPLE_OAUTH_ID)
                 .build();
         userRepository.saveAndFlush(user);
         return user;

@@ -31,7 +31,6 @@ class DoorbellServiceTest {
     private static final User SAMPLE_USER = User.builder()
             .id(USER_ID)
             .doorbellDevices(List.of(SAMPLE_DOORBELL))
-            .name("User")
             .build();
 
     @Mock

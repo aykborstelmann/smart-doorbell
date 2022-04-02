@@ -1,4 +1,4 @@
-package de.borstelmann.doorbell.server.config;
+package de.borstelmann.doorbell.server.config.websocket;
 
 import de.borstelmann.doorbell.server.services.AuthChannelInterceptorAdapter;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package de.borstelmann.doorbell.server.config;
+package de.borstelmann.doorbell.server.config.websocket;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.messaging.MessageSecurityMetadataSourceRegistry;

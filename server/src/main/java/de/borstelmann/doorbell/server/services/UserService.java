@@ -1,8 +1,8 @@
 package de.borstelmann.doorbell.server.services;
 
-import de.borstelmann.doorbell.server.error.NotFoundException;
 import de.borstelmann.doorbell.server.domain.model.User;
 import de.borstelmann.doorbell.server.domain.repository.UserRepository;
+import de.borstelmann.doorbell.server.error.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +13,6 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
-
-    public User createUser(User user) {
-        return userRepository.save(user);
-    }
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -36,4 +32,12 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
+    public User getOrCreateUserByOAuthId(String oAuthId) {
+        return userRepository.findByOAuthId(oAuthId)
+                .orElseGet(() -> createUserWithOAuthId(oAuthId));
+    }
+
+    private User createUserWithOAuthId(String oAuthId) {
+        return userRepository.save(User.builder().oAuthId(oAuthId).build());
+    }
 }

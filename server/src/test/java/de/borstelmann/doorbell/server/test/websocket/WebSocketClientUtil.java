@@ -1,4 +1,4 @@
-package de.borstelmann.doorbell.server.test;
+package de.borstelmann.doorbell.server.test.websocket;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;

@@ -5,9 +5,9 @@ import de.borstelmann.doorbell.server.domain.model.DoorbellDevice;
 import de.borstelmann.doorbell.server.domain.model.User;
 import de.borstelmann.doorbell.server.dto.OpenMessage;
 import de.borstelmann.doorbell.server.dto.StateMessage;
-import de.borstelmann.doorbell.server.test.SpringIntegrationTest;
-import de.borstelmann.doorbell.server.test.StompConfig;
-import de.borstelmann.doorbell.server.test.WebSocketClientUtil;
+import de.borstelmann.doorbell.server.test.authentication.OAuthIntegrationTest;
+import de.borstelmann.doorbell.server.test.websocket.StompConfig;
+import de.borstelmann.doorbell.server.test.websocket.WebSocketClientUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +29,7 @@ import static org.awaitility.Awaitility.await;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Import(StompConfig.class)
-public class WebSocketIntegrationTest extends SpringIntegrationTest {
+public class WebSocketIntegrationTest extends OAuthIntegrationTest {
 
     private DoorbellDevice sampleDoorbellDevice;
     private StompSession stompSession;
@@ -41,7 +41,7 @@ public class WebSocketIntegrationTest extends SpringIntegrationTest {
     private WebSocketStompClient stompClient;
 
     @BeforeEach
-    void setUp() throws ExecutionException, InterruptedException {
+    void setUp() throws InterruptedException, ExecutionException {
         User sampleUser = createSampleUser();
         sampleDoorbellDevice = createSampleDoorbellDevice(sampleUser);
         stompSession = getStompSessionWithLogin(String.valueOf(sampleDoorbellDevice.getId()));
@@ -67,7 +67,7 @@ public class WebSocketIntegrationTest extends SpringIntegrationTest {
 
     @Test
     void testConnect() throws Exception {
-        mockMvc.perform(RequestUtils.createGetDoorbellRequest(sampleDoorbellDevice.getId()))
+        mockMvc.perform(RequestUtils.createGetDoorbellRequest(sampleDoorbellDevice.getId(), obtainToken()))
                 .andExpect(this::assertWithFormattedJsonFile);
     }
 
@@ -76,7 +76,7 @@ public class WebSocketIntegrationTest extends SpringIntegrationTest {
         stompSession.disconnect();
 
         await().untilAsserted(() ->
-                mockMvc.perform(RequestUtils.createGetDoorbellRequest(sampleDoorbellDevice.getId()))
+                mockMvc.perform(RequestUtils.createGetDoorbellRequest(sampleDoorbellDevice.getId(), obtainToken()))
                         .andExpect(this::assertWithFormattedJsonFile)
         );
     }
@@ -88,7 +88,7 @@ public class WebSocketIntegrationTest extends SpringIntegrationTest {
         stompSession.send("/state", stateMessage);
 
         await().untilAsserted(() ->
-                mockMvc.perform(RequestUtils.createGetDoorbellRequest(sampleDoorbellDevice.getId()))
+                mockMvc.perform(RequestUtils.createGetDoorbellRequest(sampleDoorbellDevice.getId(), obtainToken()))
                         .andExpect(this::assertWithFormattedJsonFile)
         );
     }
@@ -98,7 +98,7 @@ public class WebSocketIntegrationTest extends SpringIntegrationTest {
         AtomicReference<OpenMessage> payloadRef = new AtomicReference<>();
         subscribeAndWait(stompSession, "/user/commands/open", WebSocketClientUtil.makeHandler(OpenMessage.class, payloadRef::set));
 
-        mockMvc.perform(RequestUtils.createOpenDoorbellRequest(sampleDoorbellDevice.getId()))
+        mockMvc.perform(RequestUtils.createOpenDoorbellRequest(sampleDoorbellDevice.getId(), obtainToken()))
                 .andExpect(status().isNoContent());
 
         await().untilAsserted(() ->
@@ -112,7 +112,7 @@ public class WebSocketIntegrationTest extends SpringIntegrationTest {
         AtomicBoolean hasBeenCalled = new AtomicBoolean(false);
         subscribeAndWait(stompSession, "/user/commands/close", WebSocketClientUtil.makeHandler(String.class, s -> hasBeenCalled.set(true)));
 
-        mockMvc.perform(RequestUtils.createCloseDoorbellRequest(sampleDoorbellDevice.getId()))
+        mockMvc.perform(RequestUtils.createCloseDoorbellRequest(sampleDoorbellDevice.getId(), obtainToken()))
                 .andExpect(status().isNoContent());
 
         await().untilAsserted(() ->

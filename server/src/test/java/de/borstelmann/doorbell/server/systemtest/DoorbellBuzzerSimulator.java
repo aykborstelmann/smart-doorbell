@@ -2,7 +2,6 @@ package de.borstelmann.doorbell.server.systemtest;
 
 import de.borstelmann.doorbell.server.dto.OpenMessage;
 import de.borstelmann.doorbell.server.dto.StateMessage;
-import de.borstelmann.doorbell.server.test.WebSocketClientUtil;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
@@ -14,7 +13,7 @@ import java.time.Clock;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
-import static de.borstelmann.doorbell.server.test.WebSocketClientUtil.makeHandler;
+import static de.borstelmann.doorbell.server.test.websocket.WebSocketClientUtil.makeHandler;
 import static org.awaitility.Awaitility.await;
 
 public class DoorbellBuzzerSimulator {

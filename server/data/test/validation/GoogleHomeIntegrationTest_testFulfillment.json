@@ -1,6 +1,6 @@
 {
   "payload" : {
-    "agentUserId" : "Bearer ACCESS_TOKEN",
+    "agentUserId" : "1",
     "devices" : [ ]
   },
   "requestId" : "ff36a3cc-ec34-11e6-b1a0-64510650abcf"
