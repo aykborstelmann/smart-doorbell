@@ -9,6 +9,7 @@ import de.borstelmann.doorbell.server.domain.model.DoorbellDevice;
 import de.borstelmann.doorbell.server.domain.model.security.CustomUserSession;
 import de.borstelmann.doorbell.server.domain.model.User;
 import de.borstelmann.doorbell.server.error.BadRequestException;
+import de.borstelmann.doorbell.server.error.NotConnectedException;
 import de.borstelmann.doorbell.server.services.DoorbellBuzzerStateService;
 import de.borstelmann.doorbell.server.services.DoorbellService;
 import de.borstelmann.doorbell.server.services.mapper.GoogleHomeMapper;
@@ -55,11 +56,18 @@ public class DoorbellSmartHomeApp extends SmartHomeApp {
         for (ExecuteRequest.Inputs.Payload.Commands command : getInputs(executeRequest).payload.commands) {
             for (ExecuteRequest.Inputs.Payload.Commands.Devices device : command.getDevices()) {
                 for (ExecuteRequest.Inputs.Payload.Commands.Execution execution : command.getExecution()) {
-                    Map<String, Object> states = executeCommand(device, execution);
-
                     ExecuteResponse.Payload.Commands commandResponse = new ExecuteResponse.Payload.Commands();
                     commandResponse.ids = new String[]{device.getId()};
-                    commandResponse.status = GoogleHomeMapper.PENDING;
+                    try {
+                        Map<String, Object> states = executeCommand(device, execution);
+
+                        commandResponse.setStates(states);
+                        commandResponse.status = GoogleHomeMapper.PENDING;
+                    } catch (NotConnectedException e) {
+                        commandResponse.setStates(Map.of(GoogleHomeMapper.ONLINE_KEY, false));
+                        commandResponse.status = GoogleHomeMapper.OFFLINE;
+
+                    }
 
                     commandsResponse.add(commandResponse);
                 }
@@ -86,6 +94,11 @@ public class DoorbellSmartHomeApp extends SmartHomeApp {
     }
 
     private void executeOpenClose(ExecuteRequest.Inputs.Payload.Commands.Devices device, Boolean shouldLock) {
+        DoorbellDevice doorbell = doorbellService.getDoorbell(Long.parseLong(device.getId()));
+        if (!doorbell.getIsConnected()) {
+            throw new NotConnectedException();
+        }
+
         if (shouldLock) {
             doorbellBuzzerStateService.closeDoor(Long.valueOf(device.getId()));
         } else {

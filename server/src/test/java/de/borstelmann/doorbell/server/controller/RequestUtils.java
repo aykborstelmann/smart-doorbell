@@ -18,6 +18,16 @@ public class RequestUtils {
                 .content(requestBody);
     }
 
+
+    @NotNull
+    public static MockHttpServletRequestBuilder createFulfillmentRequest(String requestBody, String bearer) {
+        return post("/api/v1/fulfillment")
+                .header(HttpHeaders.AUTHORIZATION, getBearer(bearer))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody);
+    }
+
+
     @NotNull
     public static RequestBuilder createGetAllUsersRequest(String bearer) {
         return get("/api/v1/users")
