@@ -55,6 +55,7 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'de.cronn:validation-file-assertions:0.2.0'
     testImplementation 'org.awaitility:awaitility:4.2.0'
+    testImplementation 'de.cronn:test-utils:0.3.0'
 }
 
 dependencyManagement {

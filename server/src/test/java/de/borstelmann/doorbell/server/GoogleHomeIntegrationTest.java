@@ -50,7 +50,7 @@ public class GoogleHomeIntegrationTest extends OAuthIntegrationTest {
                 """;
 
 
-        assertIsOkay(createFulfillmentRequest(fulfillmentRequest, token), getNormalizers());
+        assertIsOkay(createFulfillmentRequest(fulfillmentRequest, token));
     }
 
 
@@ -74,7 +74,7 @@ public class GoogleHomeIntegrationTest extends OAuthIntegrationTest {
                 }
                 """.formatted(sampleDoorbellDevice.getId());
 
-        assertIsOkay(createFulfillmentRequest(fulfillmentRequest, token), getNormalizers());
+        assertIsOkay(createFulfillmentRequest(fulfillmentRequest, token));
     }
 
     @Test
@@ -102,7 +102,7 @@ public class GoogleHomeIntegrationTest extends OAuthIntegrationTest {
 
         mockMvc.perform(createFulfillmentRequest(fulfillmentRequest, token))
                 .andExpect(status().isOk())
-                .andExpect(result -> assertWithFormattedJsonFile(result, getNormalizers()));
+                .andExpect(this::assertWithFormattedJsonFile);
     }
 
     @Test
@@ -129,7 +129,7 @@ public class GoogleHomeIntegrationTest extends OAuthIntegrationTest {
                 }
                 """.formatted(sampleDoorbellDevice.getId());
 
-        assertIsOkay(createFulfillmentRequest(fulfillmentRequest, token), getNormalizers());
+        assertIsOkay(createFulfillmentRequest(fulfillmentRequest, token));
     }
 
 
@@ -169,8 +169,7 @@ public class GoogleHomeIntegrationTest extends OAuthIntegrationTest {
                 }
                 """.formatted(sampleDoorbellDevice.getId());
 
-        assertIsOkay(createFulfillmentRequest(fulfillmentRequest, token), getNormalizers());
-
+        assertIsOkay(createFulfillmentRequest(fulfillmentRequest, token));
         verify(doorbellBuzzerStateService).openDoor(sampleDoorbellDevice.getId());
     }
 
@@ -215,7 +214,7 @@ public class GoogleHomeIntegrationTest extends OAuthIntegrationTest {
                 """.formatted(sampleDoorbellDevice.getId());
 
 
-        assertIsOkay(createFulfillmentRequest(fulfillmentRequest, obtainToken(differentOauthId)), getNormalizers());
+        assertIsOkay(createFulfillmentRequest(fulfillmentRequest, obtainToken(differentOauthId)));
 
         verify(doorbellBuzzerStateService, never()).openDoor(sampleDoorbellDevice.getId());
     }
@@ -257,7 +256,7 @@ public class GoogleHomeIntegrationTest extends OAuthIntegrationTest {
                 }
                 """.formatted(sampleDoorbellDevice.getId());
 
-        assertIsOkay(createFulfillmentRequest(fulfillmentRequest, token), getNormalizers());
+        assertIsOkay(createFulfillmentRequest(fulfillmentRequest, token));
 
         verify(doorbellBuzzerStateService).closeDoor(sampleDoorbellDevice.getId());
     }
@@ -298,17 +297,8 @@ public class GoogleHomeIntegrationTest extends OAuthIntegrationTest {
                 }
                 """.formatted(sampleDoorbellDevice.getId());
 
-        assertIsOkay(createFulfillmentRequest(fulfillmentRequest, token), getNormalizers());
-
+        assertIsOkay(createFulfillmentRequest(fulfillmentRequest, token));
         verify(doorbellBuzzerStateService, never()).openDoor(sampleDoorbellDevice.getId());
     }
 
-    @NotNull
-    private ValidationNormalizer getNormalizers() {
-        IdNormalizer agentUserIdNormalizer = new IdNormalizer("\"agentUserId\"\\s?:\\s?\"(\\d+)\"");
-        IdNormalizer queryDeviceIdNormalizer = new IdNormalizer("\"(\\d)\"\\s?:");
-        IdNormalizer executeDeviceIdNormalizer = new IdNormalizer("\\[\\s?\"(\\d+)\"\\s?]");
-        IdNormalizer deviceIdNormalizer = new IdNormalizer("\"id\"\\s?:\\s?\"(\\d+)\"");
-        return ValidationNormalizer.combine(agentUserIdNormalizer, queryDeviceIdNormalizer, executeDeviceIdNormalizer, deviceIdNormalizer);
-    }
 }

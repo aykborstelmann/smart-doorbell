@@ -11,19 +11,19 @@ import java.io.UnsupportedEncodingException;
 
 public abstract class BaseTest implements JUnit5ValidationFileAssertions {
 
-    public void assertWithFormattedJsonFile(String responseBody) {
+    protected void assertWithFormattedJsonFile(String responseBody) {
         assertWithJsonFile(formatJsonString(responseBody));
     }
 
-    public void assertWithFormattedJsonFile(Object object) {
+    protected void assertWithFormattedJsonFile(Object object) {
         assertWithJsonFile(formatJson(object));
     }
 
-    public void assertWithFormattedJsonFile(String responseBody, ValidationNormalizer validationNormalizer) {
-        assertWithJsonFile(formatJsonString(responseBody), validationNormalizer);
+    protected void assertWithFormattedJsonFile(MvcResult result) throws UnsupportedEncodingException {
+        this.assertWithFormattedJsonFile(result.getResponse().getContentAsString());
     }
 
-    public String formatJson(Object object) {
+    protected String formatJson(Object object) {
         try {
             return getObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(object);
         } catch (JsonProcessingException e) {
@@ -31,7 +31,7 @@ public abstract class BaseTest implements JUnit5ValidationFileAssertions {
         }
     }
 
-    public String formatJsonString(String json) {
+    protected String formatJsonString(String json) {
         if (json.isBlank()) {
             return json;
         }
@@ -47,13 +47,5 @@ public abstract class BaseTest implements JUnit5ValidationFileAssertions {
     @NotNull
     protected ObjectMapper getObjectMapper() {
         return new ObjectMapper();
-    }
-
-    protected void assertWithFormattedJsonFile(MvcResult result) throws UnsupportedEncodingException {
-        this.assertWithFormattedJsonFile(result.getResponse().getContentAsString());
-    }
-
-    protected void assertWithFormattedJsonFile(MvcResult result, ValidationNormalizer validationNormalizer) throws UnsupportedEncodingException {
-        this.assertWithFormattedJsonFile(result.getResponse().getContentAsString(), validationNormalizer);
     }
 }
