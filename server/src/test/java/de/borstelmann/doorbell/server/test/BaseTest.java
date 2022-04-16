@@ -12,14 +12,26 @@ import java.io.UnsupportedEncodingException;
 public abstract class BaseTest implements JUnit5ValidationFileAssertions {
 
     public void assertWithFormattedJsonFile(String responseBody) {
-        assertWithJsonFile(formatJson(responseBody));
+        assertWithJsonFile(formatJsonString(responseBody));
+    }
+
+    public void assertWithFormattedJsonFile(Object object) {
+        assertWithJsonFile(formatJson(object));
     }
 
     public void assertWithFormattedJsonFile(String responseBody, ValidationNormalizer validationNormalizer) {
-        assertWithJsonFile(formatJson(responseBody), validationNormalizer);
+        assertWithJsonFile(formatJsonString(responseBody), validationNormalizer);
     }
 
-    public String formatJson(String json) {
+    public String formatJson(Object object) {
+        try {
+            return getObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String formatJsonString(String json) {
         if (json.isBlank()) {
             return json;
         }

@@ -35,13 +35,13 @@ public abstract class SpringIntegrationTest extends BaseTest {
 
     @Override
     public void assertWithFormattedJsonFile(String responseBody) {
-        String formattedJson = formatJson(responseBody);
+        String formattedJson = formatJsonString(responseBody);
         super.assertWithJsonFile(formattedJson, getJsonIdNormalizer());
     }
 
     @Override
     public void assertWithFormattedJsonFile(String responseBody, ValidationNormalizer validationNormalizer) {
-        String formattedJson = formatJson(responseBody);
+        String formattedJson = formatJsonString(responseBody);
         super.assertWithFormattedJsonFile(getJsonIdNormalizer().normalize(formattedJson), validationNormalizer);
     }
 

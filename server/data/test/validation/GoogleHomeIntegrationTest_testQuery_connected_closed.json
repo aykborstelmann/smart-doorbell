@@ -4,8 +4,8 @@
       "1" : {
         "isJammed" : false,
         "online" : true,
-        "status" : "SUCCESS",
-        "isLocked" : true
+        "isLocked" : true,
+        "status" : "SUCCESS"
       }
     }
   },

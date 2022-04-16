@@ -10,12 +10,12 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import static de.borstelmann.doorbell.server.controller.RequestUtils.createFulfillmentRequest;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class GoogleHomeIntegrationTest extends OAuthIntegrationTest {
 
@@ -100,7 +100,9 @@ public class GoogleHomeIntegrationTest extends OAuthIntegrationTest {
                 }
                 """.formatted(sampleDoorbellDevice.getId());
 
-        assertIsOkay(createFulfillmentRequest(fulfillmentRequest, token), getNormalizers());
+        mockMvc.perform(createFulfillmentRequest(fulfillmentRequest, token))
+                .andExpect(status().isOk())
+                .andExpect(result -> assertWithFormattedJsonFile(result, getNormalizers()));
     }
 
     @Test
@@ -137,35 +139,35 @@ public class GoogleHomeIntegrationTest extends OAuthIntegrationTest {
         doorbellDeviceRepository.save(sampleDoorbellDevice);
 
         String fulfillmentRequest = """
-        {
-          "inputs": [
-            {
-              "intent": "action.devices.EXECUTE",
-              "payload": {
-                "commands": [
-                  {
-                    "devices": [
-                      {
-                        "id": "%d"
+                {
+                  "inputs": [
+                    {
+                      "intent": "action.devices.EXECUTE",
+                      "payload": {
+                        "commands": [
+                          {
+                            "devices": [
+                              {
+                                "id": "%d"
+                              }
+                            ],
+                            "execution": [
+                              {
+                                "command": "action.devices.commands.LockUnlock",
+                                "params": {
+                                  "followUpToken": "[followUpToken]",
+                                  "lock": false
+                                }
+                              }
+                            ]
+                          }
+                        ]
                       }
-                    ],
-                    "execution": [
-                      {
-                        "command": "action.devices.commands.LockUnlock",
-                        "params": {
-                          "followUpToken": "[followUpToken]",
-                          "lock": false
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          ],
-          "requestId": "4982066045573259553"
-        }
-        """.formatted(sampleDoorbellDevice.getId());
+                    }
+                  ],
+                  "requestId": "4982066045573259553"
+                }
+                """.formatted(sampleDoorbellDevice.getId());
 
         assertIsOkay(createFulfillmentRequest(fulfillmentRequest, token), getNormalizers());
 
@@ -173,40 +175,87 @@ public class GoogleHomeIntegrationTest extends OAuthIntegrationTest {
     }
 
     @Test
+    void testExecute_wrongUser() throws Exception {
+        String differentOauthId = "differentOAuthId";
+        User user = User.builder().oAuthId(differentOauthId).build();
+        userRepository.save(user);
+
+        sampleDoorbellDevice.setIsConnected(true);
+        doorbellDeviceRepository.save(sampleDoorbellDevice);
+
+        String fulfillmentRequest = """
+                {
+                  "inputs": [
+                    {
+                      "intent": "action.devices.EXECUTE",
+                      "payload": {
+                        "commands": [
+                          {
+                            "devices": [
+                              {
+                                "id": "%d"
+                              }
+                            ],
+                            "execution": [
+                              {
+                                "command": "action.devices.commands.LockUnlock",
+                                "params": {
+                                  "followUpToken": "[followUpToken]",
+                                  "lock": false
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "requestId": "4982066045573259553"
+                }
+                """.formatted(sampleDoorbellDevice.getId());
+
+
+        assertIsOkay(createFulfillmentRequest(fulfillmentRequest, obtainToken(differentOauthId)), getNormalizers());
+
+        verify(doorbellBuzzerStateService, never()).openDoor(sampleDoorbellDevice.getId());
+    }
+
+
+    @Test
     void testExecute_lock() throws Exception {
         sampleDoorbellDevice.setIsConnected(true);
         doorbellDeviceRepository.save(sampleDoorbellDevice);
 
         String fulfillmentRequest = """
-        {
-          "inputs": [
-            {
-              "intent": "action.devices.EXECUTE",
-              "payload": {
-                "commands": [
-                  {
-                    "devices": [
-                      {
-                        "id": "%d"
+                {
+                  "inputs": [
+                    {
+                      "intent": "action.devices.EXECUTE",
+                      "payload": {
+                        "commands": [
+                          {
+                            "devices": [
+                              {
+                                "id": "%d"
+                              }
+                            ],
+                            "execution": [
+                              {
+                                "command": "action.devices.commands.LockUnlock",
+                                "params": {
+                                  "followUpToken": "[followUpToken]",
+                                  "lock": true
+                                }
+                              }
+                            ]
+                          }
+                        ]
                       }
-                    ],
-                    "execution": [
-                      {
-                        "command": "action.devices.commands.LockUnlock",
-                        "params": {
-                          "followUpToken": "[followUpToken]",
-                          "lock": true
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          ],
-          "requestId": "4982066045573259553"
-        }
-        """.formatted(sampleDoorbellDevice.getId());
+                    }
+                  ],
+                  "requestId": "4982066045573259553"
+                }
+                """.formatted(sampleDoorbellDevice.getId());
 
         assertIsOkay(createFulfillmentRequest(fulfillmentRequest, token), getNormalizers());
 
@@ -219,35 +268,35 @@ public class GoogleHomeIntegrationTest extends OAuthIntegrationTest {
         doorbellDeviceRepository.save(sampleDoorbellDevice);
 
         String fulfillmentRequest = """
-        {
-          "inputs": [
-            {
-              "intent": "action.devices.EXECUTE",
-              "payload": {
-                "commands": [
-                  {
-                    "devices": [
-                      {
-                        "id": "%d"
+                {
+                  "inputs": [
+                    {
+                      "intent": "action.devices.EXECUTE",
+                      "payload": {
+                        "commands": [
+                          {
+                            "devices": [
+                              {
+                                "id": "%d"
+                              }
+                            ],
+                            "execution": [
+                              {
+                                "command": "action.devices.commands.LockUnlock",
+                                "params": {
+                                  "followUpToken": "[followUpToken]",
+                                  "lock": false
+                                }
+                              }
+                            ]
+                          }
+                        ]
                       }
-                    ],
-                    "execution": [
-                      {
-                        "command": "action.devices.commands.LockUnlock",
-                        "params": {
-                          "followUpToken": "[followUpToken]",
-                          "lock": false
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          ],
-          "requestId": "4982066045573259553"
-        }
-        """.formatted(sampleDoorbellDevice.getId());
+                    }
+                  ],
+                  "requestId": "4982066045573259553"
+                }
+                """.formatted(sampleDoorbellDevice.getId());
 
         assertIsOkay(createFulfillmentRequest(fulfillmentRequest, token), getNormalizers());
 

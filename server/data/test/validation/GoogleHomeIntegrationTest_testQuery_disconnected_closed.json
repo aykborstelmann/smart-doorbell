@@ -4,8 +4,8 @@
       "1" : {
         "isJammed" : false,
         "online" : false,
-        "status" : "OFFLINE",
-        "isLocked" : true
+        "isLocked" : true,
+        "status" : "OFFLINE"
       }
     }
   },

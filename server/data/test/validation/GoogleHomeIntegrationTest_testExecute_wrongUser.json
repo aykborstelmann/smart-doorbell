@@ -1,0 +1,9 @@
+{
+  "payload" : {
+    "commands" : [ {
+      "ids" : [ "1" ],
+      "status" : "EXCEPTIONS"
+    } ]
+  },
+  "requestId" : "4982066045573259553"
+}
