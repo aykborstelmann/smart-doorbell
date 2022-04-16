@@ -4,15 +4,11 @@ import de.borstelmann.doorbell.server.domain.model.DoorbellDevice;
 import de.borstelmann.doorbell.server.domain.model.User;
 import de.borstelmann.doorbell.server.services.DoorbellBuzzerStateService;
 import de.borstelmann.doorbell.server.test.authentication.OAuthIntegrationTest;
-import de.cronn.assertions.validationfile.normalization.IdNormalizer;
-import de.cronn.assertions.validationfile.normalization.ValidationNormalizer;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import static de.borstelmann.doorbell.server.controller.RequestUtils.createFulfillmentRequest;
+import static de.borstelmann.doorbell.server.test.RequestUtils.createFulfillmentRequest;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -30,12 +26,6 @@ public class GoogleHomeIntegrationTest extends OAuthIntegrationTest {
         User sampleUser = createSampleUser();
         sampleDoorbellDevice = createSampleDoorbellDevice(sampleUser);
         token = obtainToken();
-    }
-
-    @AfterEach
-    void tearDown() {
-        doorbellDeviceRepository.deleteAll();
-        userRepository.deleteAll();
     }
 
     @Test

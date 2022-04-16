@@ -1,6 +1,6 @@
 package de.borstelmann.doorbell.server;
 
-import de.borstelmann.doorbell.server.controller.RequestUtils;
+import de.borstelmann.doorbell.server.test.RequestUtils;
 import de.borstelmann.doorbell.server.domain.model.DoorbellDevice;
 import de.borstelmann.doorbell.server.domain.model.User;
 import de.borstelmann.doorbell.server.dto.OpenMessage;
@@ -8,6 +8,7 @@ import de.borstelmann.doorbell.server.dto.StateMessage;
 import de.borstelmann.doorbell.server.test.authentication.OAuthIntegrationTest;
 import de.borstelmann.doorbell.server.test.websocket.StompConfig;
 import de.borstelmann.doorbell.server.test.websocket.WebSocketClientUtil;
+import de.cronn.testutils.h2.H2Util;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,14 +49,14 @@ public class WebSocketIntegrationTest extends OAuthIntegrationTest {
     }
 
     @AfterEach
-    void tearDown() {
+    @Override
+    public void tearDown(@Autowired H2Util h2Util) {
         if (stompSession.isConnected()) {
             stompSession.disconnect();
             await().until(() -> !stompSession.isConnected());
         }
 
-        doorbellDeviceRepository.deleteAll();
-        userRepository.deleteAll();
+        super.tearDown(h2Util);
     }
 
     @Test

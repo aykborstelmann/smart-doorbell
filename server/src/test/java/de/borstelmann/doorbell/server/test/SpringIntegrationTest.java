@@ -35,7 +35,7 @@ public abstract class SpringIntegrationTest extends BaseTest {
     protected DoorbellDeviceRepository doorbellDeviceRepository;
 
     @AfterEach
-    void tearDown(@Autowired H2Util h2Util) {
+    protected void tearDown(@Autowired H2Util h2Util) {
         h2Util.resetDatabase();
     }
 

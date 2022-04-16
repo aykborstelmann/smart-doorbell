@@ -5,6 +5,8 @@ import de.borstelmann.doorbell.server.domain.model.User;
 import de.borstelmann.doorbell.server.test.UnitTestClock;
 import de.borstelmann.doorbell.server.test.authentication.OAuthIntegrationTest;
 import de.borstelmann.doorbell.server.test.websocket.StompConfig;
+import de.cronn.testutils.h2.H2Util;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +46,13 @@ public abstract class AbstractSimulatedBuzzerSystemTest extends OAuthIntegration
         doorbellBuzzerSimulator.connect(String.valueOf(sampleDoorbellDevice.getId()));
     }
 
+    @AfterEach
+    @Override
+    protected void tearDown(@Autowired H2Util h2Util) {
+        doorbellBuzzerSimulator.reset();
+        super.tearDown(h2Util);
+    }
+
     private String webSocketUrl() {
         return String.format("ws://localhost:%d/api/v1/websocket", localServerPort);
     }
@@ -51,38 +60,37 @@ public abstract class AbstractSimulatedBuzzerSystemTest extends OAuthIntegration
     @Test
     void testOpen() throws Exception {
         openDoorbell();
-        await().untilAsserted(() -> {
-            assertThat(doorbellBuzzerSimulator.isOpen()).isTrue();
-            queryDoorbell();
-        });
+        doorbellBuzzerSimulator.awaitDoorbellIsOpen();
+        awaitAssertQueryResponse();
     }
 
     @Test
     void testOpenAndWait() throws Exception {
         openDoorbell();
-        await().untilAsserted(() ->
-                assertThat(doorbellBuzzerSimulator.isOpen()).isTrue()
-        );
+        doorbellBuzzerSimulator.awaitDoorbellIsOpen();
+
         clock.setInstant(clock.instant().plus(6, ChronoUnit.SECONDS));
         doorbellBuzzerSimulator.loop();
+
         assertThat(doorbellBuzzerSimulator.isOpen()).isFalse();
-        await().untilAsserted(this::queryDoorbell);
+        awaitAssertQueryResponse();
     }
 
     @Test
     void testOpenAndClose() throws Exception {
         openDoorbell();
-        await().untilAsserted(() ->
-                assertThat(doorbellBuzzerSimulator.isOpen()).isTrue()
-        );
+        doorbellBuzzerSimulator.awaitDoorbellIsOpen();
+
         closeDoorbell();
-        await().untilAsserted(() -> {
-            assertThat(doorbellBuzzerSimulator.isOpen()).isFalse();
-            queryDoorbell();
-        });
+        doorbellBuzzerSimulator.awaitDoorbellIsClosed();
+        awaitAssertQueryResponse();
     }
 
-    protected abstract void queryDoorbell() throws Exception;
+    private void awaitAssertQueryResponse() {
+        await().untilAsserted(this::assertQueryState);
+    }
+
+    protected abstract void assertQueryState() throws Exception;
 
     protected abstract void closeDoorbell() throws Exception;
 

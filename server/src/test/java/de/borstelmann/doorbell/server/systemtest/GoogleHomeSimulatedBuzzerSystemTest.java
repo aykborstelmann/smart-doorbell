@@ -1,11 +1,11 @@
 package de.borstelmann.doorbell.server.systemtest;
 
-import de.borstelmann.doorbell.server.controller.RequestUtils;
+import de.borstelmann.doorbell.server.test.RequestUtils;
 
 public class GoogleHomeSimulatedBuzzerSystemTest extends AbstractSimulatedBuzzerSystemTest {
 
     @Override
-    protected void queryDoorbell() throws Exception {
+    protected void assertQueryState() throws Exception {
         var requestBody = """
                 {
                   "inputs": [
@@ -24,8 +24,7 @@ public class GoogleHomeSimulatedBuzzerSystemTest extends AbstractSimulatedBuzzer
                 }
                 """.formatted(sampleDoorbellDevice.getId());
 
-        mockMvc.perform(RequestUtils.createFulfillmentRequest(requestBody, bearer))
-                .andExpect(this::assertWithFormattedJsonFile);
+        assertIsOkay(RequestUtils.createFulfillmentRequest(requestBody, bearer));
     }
 
     @Override

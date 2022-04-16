@@ -88,6 +88,14 @@ public class DoorbellBuzzerSimulator {
         state.session.send("/state", payload);
     }
 
+    public void awaitDoorbellIsClosed() {
+        await().until(() -> !isOpen());
+    }
+
+    public void awaitDoorbellIsOpen() {
+        await().until(this::isOpen);
+    }
+
     private static class State {
         public StompSession session;
         public boolean isOpen;

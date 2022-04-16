@@ -1,4 +1,4 @@
-package de.borstelmann.doorbell.server.controller;
+package de.borstelmann.doorbell.server.test;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpHeaders;

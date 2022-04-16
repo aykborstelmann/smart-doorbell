@@ -1,13 +1,12 @@
 package de.borstelmann.doorbell.server.systemtest;
 
-import de.borstelmann.doorbell.server.controller.RequestUtils;
+import de.borstelmann.doorbell.server.test.RequestUtils;
 
 public class ApiSimulatedBuzzerSystemTest extends AbstractSimulatedBuzzerSystemTest {
 
     @Override
-    protected void queryDoorbell() throws Exception {
-        mockMvc.perform(RequestUtils.createGetDoorbellRequest(sampleDoorbellDevice.getId(), bearer))
-                .andExpect(this::assertWithFormattedJsonFile);
+    protected void assertQueryState() throws Exception {
+        assertIsOkay(RequestUtils.createGetDoorbellRequest(sampleDoorbellDevice.getId(), bearer));
     }
 
     @Override
