@@ -6,10 +6,6 @@ import com.google.actions.api.smarthome.QueryResponse
 import com.google.actions.api.smarthome.SyncRequest
 import com.google.actions.api.smarthome.SyncResponse
 import com.google.auth.oauth2.GoogleCredentials
-import com.google.home.graph.v1.HomeGraphApiServiceProto.*
-import com.google.protobuf.Struct
-import com.google.protobuf.Value
-import de.borstelmann.doorbell.server.domain.model.DoorbellDevice
 import de.borstelmann.doorbell.server.domain.model.User
 import de.borstelmann.doorbell.server.domain.model.security.CustomUserSession
 import de.borstelmann.doorbell.server.response.google.home.GoogleHomeDeviceService
@@ -18,8 +14,6 @@ import de.borstelmann.doorbell.server.services.DoorbellService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import java.lang.IllegalArgumentException
-import java.util.*
 
 @Component
 class GoogleSmartHomeApp(
@@ -83,39 +77,12 @@ class GoogleSmartHomeApp(
         return syncResponse
     }
 
-    fun reportStateDoorbellState(doorbell: DoorbellDevice) {
-        val device = googleHomeDeviceService.getDevice(doorbell.id)
-
-        val doorbellEntity: DoorbellDevice = doorbellService.getDoorbell(doorbell.id)
-        val agentUserId = doorbellEntity.user.id.toString()
-
-        val states = Struct.newBuilder()
-        device.state.forEach { states.putFields(it.key, makeValue(it.value)) }
-
-        val deviceBuilder = ReportStateAndNotificationDevice.newBuilder()
-                .setStates(Struct.newBuilder()
-                        .putFields(doorbell.id.toString(), Value.newBuilder()
-                                .setStructValue(states)
-                                .build())
-                )
-
-        val reportStateRequest = ReportStateAndNotificationRequest.newBuilder()
-                .setRequestId(UUID.randomUUID().toString())
-                .setAgentUserId(agentUserId)
-                .setPayload(StateAndNotificationPayload.newBuilder()
-                        .setDevices(deviceBuilder))
-                .build()
-
+    fun reportStateDoorbellState(deviceId: Long) {
+        val reportStateRequest = googleHomeDeviceService.makeReportDeviceStateRequest(deviceId)
         val reportStateAndNotificationResponse = reportState(reportStateRequest)
         log.info("Got response {}", reportStateAndNotificationResponse)
     }
 
-    private fun makeValue(value: Any): Value? {
-        if (value is Boolean) {
-            return Value.newBuilder().setBoolValue(value).build()
-        }
-        throw IllegalArgumentException("Unknown value type ${value.javaClass}")
-    }
 
     @Suppress("KotlinConstantConditions")
     private fun getExecuteRequestInputs(request: ExecuteRequest) =

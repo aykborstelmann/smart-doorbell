@@ -16,7 +16,7 @@ public class DoorbellStateChangeService {
                 .ifPresent(doorbell -> {
                     doorbell.setIsOpened(isOpened);
                     doorbellDeviceRepository.save(doorbell);
-                    googleSmartHomeApp.reportStateDoorbellState(doorbell);
+                    googleSmartHomeApp.reportStateDoorbellState(doorbell.getId());
                 });
     }
 
