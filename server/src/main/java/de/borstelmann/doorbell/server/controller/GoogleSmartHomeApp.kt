@@ -18,8 +18,7 @@ import org.springframework.stereotype.Component
 @Component
 class GoogleSmartHomeApp(
         private val googleHomeExecutionService: GoogleHomeExecutionService,
-        private val googleHomeDeviceService: GoogleHomeDeviceService,
-        private val doorbellService: DoorbellService
+        private val googleHomeDeviceService: GoogleHomeDeviceService
 ) : SmartHomeApp() {
 
     private val log = LoggerFactory.getLogger(this.javaClass)
