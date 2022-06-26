@@ -16,9 +16,9 @@ public class GoogleHomeDoorbellDevice {
 
     public static final String ONLINE = "online";
     public static final String STATUS = "status";
+    public static final String TYPE = "action.devices.types.LOCK";
 
     private static final Set<DeviceTrait> TRAITS = Set.of(DeviceTrait.LOCK_UNLOCK);
-    private static final DeviceType TYPE = DeviceType.LOCK;
     private static final List<String> DEFAULT_NAMES = Collections.singletonList("Smart Doorbell-Buzzer");
     private static final boolean WILL_REPORT_STATE = true;
 
@@ -53,7 +53,7 @@ public class GoogleHomeDoorbellDevice {
 
     public SyncResponse.Payload.Device getSync() {
         SyncResponse.Payload.Device.Builder builder = new SyncResponse.Payload.Device.Builder()
-                .setType(TYPE.toString())
+                .setType(TYPE)
                 .setId(id)
                 .setName(DEFAULT_NAMES, name, Collections.singletonList(name))
                 .setWillReportState(WILL_REPORT_STATE);

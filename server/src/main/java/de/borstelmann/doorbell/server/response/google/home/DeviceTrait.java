@@ -15,7 +15,10 @@ public enum DeviceTrait {
     }
 
     public static class LockUnlockStateKeys {
-        public static String IS_LOCKED = "isLocked";
-        public static String IS_JAMMED = "isJammed";
+        public static final String IS_LOCKED = "isLocked";
+        public static final String IS_JAMMED = "isJammed";
+
+        private LockUnlockStateKeys() {
+        }
     }
 }

@@ -26,6 +26,9 @@ public enum DeviceCommand {
 
     public static class LockCommandParamsKeys {
         public static final String LOCK = "lock";
+
+        private LockCommandParamsKeys() {
+        }
     }
 
 }

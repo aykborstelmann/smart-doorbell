@@ -10,8 +10,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import static de.borstelmann.doorbell.server.response.google.home.DeviceTrait.LockUnlockStateKeys.IS_JAMMED;
 import static de.borstelmann.doorbell.server.response.google.home.DeviceTrait.LockUnlockStateKeys.IS_LOCKED;
-import static de.borstelmann.doorbell.server.response.google.home.GoogleHomeDoorbellDevice.ONLINE;
-import static de.borstelmann.doorbell.server.response.google.home.GoogleHomeDoorbellDevice.STATUS;
+import static de.borstelmann.doorbell.server.response.google.home.GoogleHomeDoorbellDevice.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class GoogleHomeDoorbellDeviceTest {
@@ -97,7 +96,7 @@ class GoogleHomeDoorbellDeviceTest {
         assertThat(device.getId()).isEqualTo(String.valueOf(id));
         assertThat(device.getTraitsList())
                 .containsExactly(DeviceTrait.LOCK_UNLOCK.toString());
-        assertThat(device.getType()).isEqualTo(DeviceType.LOCK.toString());
+        assertThat(device.getType()).isEqualTo(GoogleHomeDoorbellDevice.TYPE);
 
         assertThat(device.getName().getName()).isEqualTo(name);
         assertThat(device.getName().getDefaultNamesList()).containsExactly("Smart Doorbell-Buzzer");
