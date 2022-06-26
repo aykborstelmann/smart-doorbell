@@ -59,12 +59,6 @@ public class GoogleHomeDeviceService {
 
     public ReportStateAndNotificationRequest makeReportDeviceStateRequest(long deviceId) {
         var device = getDevice(deviceId);
-        var doorbellEntity = doorbellService.getDoorbell(deviceId);
-
-        var agentUserId = doorbellEntity
-            .getUser()
-            .getId()
-            .toString();
 
         var states = Struct.newBuilder();
 
@@ -87,7 +81,7 @@ public class GoogleHomeDeviceService {
             .setRequestId(UUID
                 .randomUUID()
                 .toString())
-            .setAgentUserId(agentUserId)
+            .setAgentUserId(device.getAgentUserId())
             .setPayload(StateAndNotificationPayload
                 .newBuilder()
                 .setDevices(deviceBuilder))

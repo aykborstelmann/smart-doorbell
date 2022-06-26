@@ -3,6 +3,7 @@ package de.borstelmann.doorbell.server.response.google.home;
 import com.google.actions.api.smarthome.SyncResponse;
 import com.google.home.graph.v1.DeviceProto;
 import de.borstelmann.doorbell.server.domain.model.DoorbellDevice;
+import de.borstelmann.doorbell.server.domain.model.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -18,16 +19,19 @@ class GoogleHomeDoorbellDeviceTest {
     @Test
     void testFromDomainModelDevice() {
         long id = 0L;
+        long userId = 1L;
         String name = "Name";
 
         DoorbellDevice doorbellDevice = DoorbellDevice.builder()
                 .name(name)
                 .id(id)
+                .user(User.builder().id(userId).build())
                 .build();
 
         GoogleHomeDoorbellDevice googleHomeDoorbellDevice = GoogleHomeDoorbellDevice.fromDomainModelDevice(doorbellDevice);
 
-        assertThat(googleHomeDoorbellDevice.getId()).isEqualTo(String.valueOf(id));
+        assertThat(googleHomeDoorbellDevice.getId()).isEqualTo("0");
+        assertThat(googleHomeDoorbellDevice.getAgentUserId()).isEqualTo("1");
     }
 
     @Test

@@ -1,7 +1,9 @@
 package de.borstelmann.doorbell.server.response.google.home;
 
 import com.google.actions.api.smarthome.SyncResponse;
+
 import de.borstelmann.doorbell.server.domain.model.DoorbellDevice;
+import de.borstelmann.doorbell.server.domain.model.User;
 
 import java.util.*;
 
@@ -23,6 +25,8 @@ public class GoogleHomeDoorbellDevice {
     private String id;
     private String name;
 
+    private String agentUserId;
+
     private DoorbellDevice doorbellDevice;
 
     private GoogleHomeDoorbellDevice() {
@@ -34,8 +38,17 @@ public class GoogleHomeDoorbellDevice {
         googleHomeDoorbellDevice.doorbellDevice = doorbellDevice;
         googleHomeDoorbellDevice.id = String.valueOf(doorbellDevice.getId());
         googleHomeDoorbellDevice.name = doorbellDevice.getName();
+        googleHomeDoorbellDevice.agentUserId = retrieveAgentUserId(doorbellDevice);
 
         return googleHomeDoorbellDevice;
+    }
+
+    private static String retrieveAgentUserId(DoorbellDevice doorbellDevice) {
+        return Optional
+                .ofNullable(doorbellDevice.getUser())
+                .map(User::getId)
+                .map(String::valueOf)
+                .orElse(null);
     }
 
     public SyncResponse.Payload.Device getSync() {
@@ -73,4 +86,9 @@ public class GoogleHomeDoorbellDevice {
     public String getId() {
         return this.id;
     }
+
+    public String getAgentUserId() {
+        return agentUserId;
+    }
+
 }
