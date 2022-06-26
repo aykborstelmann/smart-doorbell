@@ -9,15 +9,12 @@ import com.google.auth.oauth2.GoogleCredentials
 import de.borstelmann.doorbell.server.domain.model.User
 import de.borstelmann.doorbell.server.domain.model.security.CustomUserSession
 import de.borstelmann.doorbell.server.response.google.home.GoogleHomeDeviceService
-import de.borstelmann.doorbell.server.response.google.home.GoogleHomeExecutionService
-import de.borstelmann.doorbell.server.services.DoorbellService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
 class GoogleSmartHomeApp(
-        private val googleHomeExecutionService: GoogleHomeExecutionService,
         private val googleHomeDeviceService: GoogleHomeDeviceService
 ) : SmartHomeApp() {
 
@@ -33,7 +30,7 @@ class GoogleSmartHomeApp(
         executeResponse.payload = ExecuteResponse.Payload()
 
         val inputs = getExecuteRequestInputs(request)
-        val commandsResponse = googleHomeExecutionService.execute(inputs.payload.commands).toTypedArray()
+        val commandsResponse = googleHomeDeviceService.execute(inputs.payload.commands).toTypedArray()
 
         executeResponse.payload.commands = commandsResponse
         return executeResponse
