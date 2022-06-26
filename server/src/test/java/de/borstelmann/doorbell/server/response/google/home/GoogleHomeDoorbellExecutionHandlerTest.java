@@ -33,7 +33,7 @@ class GoogleHomeDoorbellExecutionHandlerTest extends BaseTest {
         Execution execution = new Execution();
         execution.setCommand(GoogleHomeDoorbellDevice.LOCK_COMMAND);
         execution.setParams(Map.of(
-                GoogleHomeDoorbellExecutionHandler.LOCK_PARAM, true
+                GoogleHomePayloadAttributes.LOCK, true
         ));
 
         ExecuteResponse.Payload.Commands execute = googleHomeDoorbellExecutionHandler.execute(googleHomeDoorbellDevice, execution);
@@ -50,7 +50,7 @@ class GoogleHomeDoorbellExecutionHandlerTest extends BaseTest {
         Execution execution = new Execution();
         execution.setCommand(GoogleHomeDoorbellDevice.LOCK_COMMAND);
         execution.setParams(Map.of(
-                GoogleHomeDoorbellExecutionHandler.LOCK_PARAM, false
+                GoogleHomePayloadAttributes.LOCK, false
         ));
 
         ExecuteResponse.Payload.Commands execute = googleHomeDoorbellExecutionHandler.execute(googleHomeDoorbellDevice, execution);
@@ -82,7 +82,7 @@ class GoogleHomeDoorbellExecutionHandlerTest extends BaseTest {
         Execution execution = new Execution();
         execution.setCommand(GoogleHomeDoorbellDevice.LOCK_COMMAND);
         execution.setParams(Map.of(
-                GoogleHomeDoorbellExecutionHandler.LOCK_PARAM, false
+                GoogleHomePayloadAttributes.LOCK, false
         ));
 
         ExecuteResponse.Payload.Commands execute = googleHomeDoorbellExecutionHandler.execute(googleHomeDoorbellDevice, execution);
@@ -99,7 +99,7 @@ class GoogleHomeDoorbellExecutionHandlerTest extends BaseTest {
         Execution execution = new Execution();
         execution.setCommand("action.devices.commands.WrongCommand");
         execution.setParams(Map.of(
-                GoogleHomeDoorbellExecutionHandler.LOCK_PARAM, false
+                GoogleHomePayloadAttributes.LOCK, false
         ));
 
         ExecuteResponse.Payload.Commands execute = googleHomeDoorbellExecutionHandler.execute(googleHomeDoorbellDevice, execution);

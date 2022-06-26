@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static de.borstelmann.doorbell.server.response.google.home.GoogleHomeDoorbellDevice.PayloadParameter.IS_JAMMED;
-import static de.borstelmann.doorbell.server.response.google.home.GoogleHomeDoorbellDevice.PayloadParameter.IS_LOCKED;
+import static de.borstelmann.doorbell.server.response.google.home.GoogleHomePayloadAttributes.IS_JAMMED;
+import static de.borstelmann.doorbell.server.response.google.home.GoogleHomePayloadAttributes.IS_LOCKED;
 import static de.borstelmann.doorbell.server.response.google.home.GoogleHomeDoorbellDevice.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -59,7 +59,7 @@ class GoogleHomeDoorbellDeviceTest {
         assertThat(googleHomeDoorbellDevice.getState())
                 .containsEntry(IS_LOCKED, !isOpened)
                 .containsEntry(IS_JAMMED, false)
-                .containsEntry(PayloadParameter.ONLINE, isConnected);
+                .containsEntry(GoogleHomePayloadAttributes.ONLINE, isConnected);
     }
 
     @ParameterizedTest
@@ -75,8 +75,8 @@ class GoogleHomeDoorbellDeviceTest {
         assertThat(googleHomeDoorbellDevice.getQueryState())
                 .containsEntry(IS_LOCKED, !isOpened)
                 .containsEntry(IS_JAMMED, false)
-                .containsEntry(PayloadParameter.ONLINE, isConnected)
-                .containsEntry(PayloadParameter.STATUS, isConnected ? DeviceStatus.SUCCESS : DeviceStatus.OFFLINE);
+                .containsEntry(GoogleHomePayloadAttributes.ONLINE, isConnected)
+                .containsEntry(GoogleHomePayloadAttributes.STATUS, isConnected ? DeviceStatus.SUCCESS : DeviceStatus.OFFLINE);
     }
 
     @Test

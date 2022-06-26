@@ -12,16 +12,6 @@ import static de.borstelmann.doorbell.server.response.google.home.DeviceStatus.S
 
 public class GoogleHomeDoorbellDevice {
 
-    public static class PayloadParameter {
-        public static final String STATUS = "status";
-        public static final String IS_LOCKED = "isLocked";
-        public static final String IS_JAMMED = "isJammed";
-        public static final String ONLINE = "online";
-
-        private PayloadParameter() {
-        }
-    }
-
     public static final String TYPE = "action.devices.types.LOCK";
     public static final String LOCK_COMMAND = "action.devices.commands.LockUnlock";
     public static final String LOCK_UNLOCK_TRAIT = "action.devices.traits.LockUnlock";
@@ -69,15 +59,15 @@ public class GoogleHomeDoorbellDevice {
 
     public Map<String, Object> getQueryState() {
         Map<String, Object> state = new HashMap<>(getState());
-        state.put(PayloadParameter.STATUS, getIsOnline() ? SUCCESS : OFFLINE);
+        state.put(GoogleHomePayloadAttributes.STATUS, getIsOnline() ? SUCCESS : OFFLINE);
         return state;
     }
 
     public Map<String, Object> getState() {
         return Map.of(
-                PayloadParameter.IS_LOCKED, !doorbellDevice.getIsOpened(),
-                PayloadParameter.IS_JAMMED, false,
-                PayloadParameter.ONLINE, getIsOnline()
+                GoogleHomePayloadAttributes.IS_LOCKED, !doorbellDevice.getIsOpened(),
+                GoogleHomePayloadAttributes.IS_JAMMED, false,
+                GoogleHomePayloadAttributes.ONLINE, getIsOnline()
         );
     }
 

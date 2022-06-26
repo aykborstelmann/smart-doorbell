@@ -40,7 +40,7 @@ public class GoogleHomeExecutionService {
                     .toList();
         } catch (ForbiddenException e) {
             return List.of(
-                    GoogleHomeDoorbellExecutionHandler.makeExceptionResponse(String.valueOf(e.getId())));
+                    GoogleHomeExecuteResponseUtil.makeExceptionResponse(String.valueOf(e.getId())));
         }
     }
 
