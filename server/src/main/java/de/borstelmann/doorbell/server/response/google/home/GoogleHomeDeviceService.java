@@ -33,11 +33,17 @@ public class GoogleHomeDeviceService {
     }
 
     public List<GoogleHomeDoorbellDevice> getDevicesForUser(User user, List<Long> devices) {
-        return doorbellDeviceRepository.findAllById(devices)
-                .stream()
-                .peek(doorbellDevice -> throwIfDoorbellDoesNotMatchUser(user, doorbellDevice))
-                .map(GoogleHomeDoorbellDevice::fromDomainModelDevice)
-                .toList();
+        List<DoorbellDevice> doorbells = doorbellDeviceRepository.findAllById(devices);
+        validateUserPermissions(user, doorbells);
+
+        return doorbells
+            .stream()
+            .map(GoogleHomeDoorbellDevice::fromDomainModelDevice)
+            .toList();
+    }
+
+    private void validateUserPermissions(User user, List<DoorbellDevice> doorbells) {
+        doorbells.forEach(doorbellDevice -> throwIfDoorbellDoesNotMatchUser(user, doorbellDevice));
     }
 
     private void throwIfDoorbellDoesNotMatchUser(User user, DoorbellDevice doorbellDevice) {
