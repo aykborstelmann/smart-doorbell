@@ -1,12 +1,13 @@
 package de.borstelmann.doorbell.server.response.google.home;
 
 import com.google.actions.api.smarthome.ExecuteResponse;
-import de.borstelmann.doorbell.server.response.google.home.DeviceStatus;
-import de.borstelmann.doorbell.server.response.google.home.GoogleHomePayloadAttributes;
 
 import java.util.Map;
 
 public class GoogleHomeExecuteResponseUtil {
+    private GoogleHomeExecuteResponseUtil() {
+    }
+
     public static ExecuteResponse.Payload.Commands makePendingResponse(String id) {
         return makeResponse(DeviceStatus.PENDING, id);
     }
@@ -26,8 +27,5 @@ public class GoogleHomeExecuteResponseUtil {
         commands.status = status.toString();
         commands.ids = new String[]{id};
         return commands;
-    }
-
-    private GoogleHomeExecuteResponseUtil() {
     }
 }
