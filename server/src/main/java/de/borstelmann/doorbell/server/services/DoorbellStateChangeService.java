@@ -1,14 +1,14 @@
 package de.borstelmann.doorbell.server.services;
 
-import de.borstelmann.doorbell.server.controller.GoogleSmartHomeApp;
 import de.borstelmann.doorbell.server.domain.repository.DoorbellDeviceRepository;
+import de.borstelmann.doorbell.server.response.google.home.GoogleHomeDeviceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class DoorbellStateChangeService {
-    private final GoogleSmartHomeApp googleSmartHomeApp;
+    private final GoogleHomeDeviceService googleHomeDeviceService;
     private final DoorbellDeviceRepository doorbellDeviceRepository;
 
     public void setIsOpened(Long deviceId, boolean isOpened) {
@@ -16,7 +16,7 @@ public class DoorbellStateChangeService {
                 .ifPresent(doorbell -> {
                     doorbell.setIsOpened(isOpened);
                     doorbellDeviceRepository.save(doorbell);
-                    googleSmartHomeApp.reportStateDoorbellState(doorbell.getId());
+                    googleHomeDeviceService.reportDeviceState(doorbell.getId());
                 });
     }
 

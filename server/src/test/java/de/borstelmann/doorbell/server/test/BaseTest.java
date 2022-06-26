@@ -23,6 +23,10 @@ public abstract class BaseTest implements JUnit5ValidationFileAssertions {
         this.assertWithFormattedJsonFile(result.getResponse().getContentAsString());
     }
 
+    public void assertWithFormattedJsonFileWithSuffix(Object object, ValidationNormalizer validationNormalizer, String suffix) {
+        assertWithJsonFileWithSuffix(formatJson(object), validationNormalizer, suffix);
+    }
+
     protected String formatJson(Object object) {
         try {
             return getObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(object);

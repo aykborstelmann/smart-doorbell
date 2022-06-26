@@ -1,16 +1,10 @@
 package de.borstelmann.doorbell.server.controller
 
 import com.google.actions.api.smarthome.*
-import com.google.actions.api.smarthome.QueryRequest
-import com.google.actions.api.smarthome.QueryResponse
-import com.google.actions.api.smarthome.SyncRequest
-import com.google.actions.api.smarthome.SyncResponse
-import com.google.auth.oauth2.GoogleCredentials
 import de.borstelmann.doorbell.server.domain.model.User
 import de.borstelmann.doorbell.server.domain.model.security.CustomUserSession
 import de.borstelmann.doorbell.server.response.google.home.GoogleHomeDeviceService
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
@@ -73,12 +67,6 @@ class GoogleSmartHomeApp(
         return syncResponse
     }
 
-    fun reportStateDoorbellState(deviceId: Long) {
-        val reportStateRequest = googleHomeDeviceService.makeReportDeviceStateRequest(deviceId)
-        val reportStateAndNotificationResponse = reportState(reportStateRequest)
-        log.info("Got response {}", reportStateAndNotificationResponse)
-    }
-
 
     @Suppress("KotlinConstantConditions")
     private fun getExecuteRequestInputs(request: ExecuteRequest) =
@@ -87,9 +75,4 @@ class GoogleSmartHomeApp(
     @Suppress("KotlinConstantConditions")
     private fun getQueryRequestInputs(request: QueryRequest) =
             request.inputs[0] as QueryRequest.Inputs
-
-    @Autowired(required = false)
-    fun setGoogleCredentials(googleCredentials: GoogleCredentials) {
-        credentials = googleCredentials
-    }
 }

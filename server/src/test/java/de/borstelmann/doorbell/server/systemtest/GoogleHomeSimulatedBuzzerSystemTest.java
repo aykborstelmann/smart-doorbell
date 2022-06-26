@@ -1,6 +1,11 @@
 package de.borstelmann.doorbell.server.systemtest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.api.services.homegraph.v1.model.ReportStateAndNotificationRequest;
 import de.borstelmann.doorbell.server.test.RequestUtils;
+import de.cronn.assertions.validationfile.normalization.IdNormalizer;
+import org.jetbrains.annotations.NotNull;
 
 public class GoogleHomeSimulatedBuzzerSystemTest extends AbstractSimulatedBuzzerSystemTest {
 
@@ -25,6 +30,9 @@ public class GoogleHomeSimulatedBuzzerSystemTest extends AbstractSimulatedBuzzer
                 """.formatted(sampleDoorbellDevice.getId());
 
         assertIsOkay(RequestUtils.createFulfillmentRequest(requestBody, bearer));
+
+        ReportStateAndNotificationRequest reportStateAndNotificationRequest = verifyReportStateRequest();
+        assertWithFormattedJsonFileWithSuffix(reportStateAndNotificationRequest, new IdNormalizer("\"requestId\" : \"(.*)\""), "report-state");
     }
 
     @Override
@@ -97,6 +105,12 @@ public class GoogleHomeSimulatedBuzzerSystemTest extends AbstractSimulatedBuzzer
                 """.formatted(sampleDoorbellDevice.getId());
 
         mockMvc.perform(RequestUtils.createFulfillmentRequest(requestBody, bearer));
+    }
+
+    @NotNull
+    @Override
+    protected ObjectMapper getObjectMapper() {
+        return objectMapper.copy().configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
     }
 
 }

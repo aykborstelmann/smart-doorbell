@@ -3,8 +3,8 @@
     "devices" : {
       "1" : {
         "isJammed" : false,
-        "online" : true,
         "isLocked" : false,
+        "online" : true,
         "status" : "SUCCESS"
       }
     }

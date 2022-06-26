@@ -2,6 +2,7 @@ package de.borstelmann.doorbell.server.response.google.home;
 
 import com.google.actions.api.smarthome.ExecuteRequest;
 import com.google.actions.api.smarthome.ExecuteResponse;
+import com.google.api.services.homegraph.v1.HomeGraphService;
 import de.borstelmann.doorbell.server.domain.model.DoorbellDevice;
 import de.borstelmann.doorbell.server.domain.model.User;
 import de.borstelmann.doorbell.server.domain.repository.DoorbellDeviceRepository;
@@ -46,6 +47,9 @@ class GoogleHomeDeviceServiceTest {
 
     @MockBean
     private UserRepository userRepository;
+
+    @MockBean
+    private HomeGraphService homeGraphService;
 
     @MockBean
     private GoogleHomeDoorbellExecutionHandler googleHomeDoorbellExecutionHandler;

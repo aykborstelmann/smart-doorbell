@@ -2,6 +2,11 @@ package de.borstelmann.doorbell.server.response.google.home;
 
 import com.google.actions.api.smarthome.ExecuteRequest;
 import com.google.actions.api.smarthome.ExecuteResponse;
+import com.google.api.services.homegraph.v1.HomeGraphService;
+import com.google.api.services.homegraph.v1.model.ReportStateAndNotificationDevice;
+import com.google.api.services.homegraph.v1.model.ReportStateAndNotificationRequest;
+import com.google.api.services.homegraph.v1.model.ReportStateAndNotificationResponse;
+import com.google.api.services.homegraph.v1.model.StateAndNotificationPayload;
 import de.borstelmann.doorbell.server.domain.model.DoorbellDevice;
 import de.borstelmann.doorbell.server.domain.model.User;
 import de.borstelmann.doorbell.server.domain.model.security.CustomUserSession;
@@ -9,27 +14,22 @@ import de.borstelmann.doorbell.server.domain.repository.DoorbellDeviceRepository
 import de.borstelmann.doorbell.server.error.ForbiddenException;
 import de.borstelmann.doorbell.server.services.DoorbellService;
 import lombok.RequiredArgsConstructor;
-
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-
-import com.google.home.graph.v1.HomeGraphApiServiceProto.ReportStateAndNotificationDevice;
-import com.google.home.graph.v1.HomeGraphApiServiceProto.ReportStateAndNotificationRequest;
-import com.google.home.graph.v1.HomeGraphApiServiceProto.StateAndNotificationPayload;
-import com.google.protobuf.Struct;
-import com.google.protobuf.Value;
+import java.io.IOException;
+import java.util.*;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class GoogleHomeDeviceService {
 
     private final DoorbellService doorbellService;
     private final DoorbellDeviceRepository doorbellDeviceRepository;
     private final GoogleHomeDoorbellExecutionHandler executionHandler;
+    private HomeGraphService homeGraphService;
 
     public List<GoogleHomeDoorbellDevice> getAllDevicesForUser(User user) {
         List<DoorbellDevice> doorbells = doorbellService.getAllDoorbells(user.getId());
@@ -95,45 +95,32 @@ public class GoogleHomeDeviceService {
                 .toList();
     }
 
-    public ReportStateAndNotificationRequest makeReportDeviceStateRequest(long deviceId) {
+    public void reportDeviceState(long deviceId) {
         var device = getDevice(deviceId);
 
-        var states = Struct.newBuilder();
+        var devicePayload = new ReportStateAndNotificationDevice()
+                .setStates(Map.of(
+                        String.valueOf(deviceId), device.getState()
+                ));
 
-        device
-            .getState()
-            .forEach((key, value) -> states.putFields(key, makeValue(value)));
+        ReportStateAndNotificationRequest payload = new ReportStateAndNotificationRequest()
+                .setRequestId(UUID
+                        .randomUUID()
+                        .toString())
+                .setAgentUserId(device.getAgentUserId())
+                .setPayload(new StateAndNotificationPayload().setDevices(devicePayload));
 
-        var deviceBuilder = ReportStateAndNotificationDevice
-            .newBuilder()
-            .setStates(Struct
-                .newBuilder()
-                .putFields(String.valueOf(deviceId), Value
-                    .newBuilder()
-                    .setStructValue(states)
-                    .build())
-            );
-
-        return ReportStateAndNotificationRequest
-            .newBuilder()
-            .setRequestId(UUID
-                .randomUUID()
-                .toString())
-            .setAgentUserId(device.getAgentUserId())
-            .setPayload(StateAndNotificationPayload
-                .newBuilder()
-                .setDevices(deviceBuilder))
-            .build();
-    }
-
-    private Value makeValue(Object value) {
-        if (value instanceof Boolean bool) {
-            return Value
-                .newBuilder()
-                .setBoolValue(bool)
-                .build();
+        try {
+            HomeGraphService.Devices.ReportStateAndNotification request = homeGraphService.devices().reportStateAndNotification(payload);
+            ReportStateAndNotificationResponse response = request.execute();
+            log.debug("Got home graph api response {}", response);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        throw new IllegalArgumentException("Unknown value type %s".formatted(value.getClass()));
     }
 
+    @Autowired(required = false)
+    public void setHomeGraphService(HomeGraphService homeGraphService) {
+        this.homeGraphService = homeGraphService;
+    }
 }
