@@ -38,7 +38,7 @@ public class GoogleHomeDoorbellExecutionHandler {
             throw new OfflineException();
         }
 
-        boolean shouldLock = getParameter(parameters, Boolean.class, LOCK_PARAM);
+        boolean shouldLock = getLockParameter(parameters);
 
         if (shouldLock) {
             doorbellBuzzerStateService.closeDoor(Long.valueOf(device.getId()));
@@ -50,10 +50,10 @@ public class GoogleHomeDoorbellExecutionHandler {
     }
 
 
-    private <T> T getParameter(Map<String, Object> parameters, Class<T> type, String key) {
+    private Boolean getLockParameter(Map<String, Object> parameters) {
         return Optional.ofNullable(parameters)
-                .map(param -> param.get(key))
-                .map(type::cast)
+                .map(param -> param.get(GoogleHomeDoorbellExecutionHandler.LOCK_PARAM))
+                .map(Boolean.class::cast)
                 .orElseThrow(ParameterNotAvailableException::new);
     }
 
