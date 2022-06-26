@@ -26,20 +26,21 @@ public class GoogleHomeDeviceService {
     private final DoorbellDeviceRepository doorbellDeviceRepository;
 
     public List<GoogleHomeDoorbellDevice> getAllDevicesForUser(User user) {
-        return doorbellService.getAllDoorbells(user.getId())
-                .stream()
-                .map(GoogleHomeDoorbellDevice::fromDomainModelDevice)
-                .toList();
+        List<DoorbellDevice> doorbells = doorbellService.getAllDoorbells(user.getId());
+        return mapToGoogleHomeDoorbellDevice(doorbells);
     }
 
     public List<GoogleHomeDoorbellDevice> getDevicesForUser(User user, List<Long> devices) {
         List<DoorbellDevice> doorbells = doorbellDeviceRepository.findAllById(devices);
         validateUserPermissions(user, doorbells);
+        return mapToGoogleHomeDoorbellDevice(doorbells);
+    }
 
+    private List<GoogleHomeDoorbellDevice> mapToGoogleHomeDoorbellDevice(List<DoorbellDevice> doorbells) {
         return doorbells
-            .stream()
-            .map(GoogleHomeDoorbellDevice::fromDomainModelDevice)
-            .toList();
+                .stream()
+                .map(GoogleHomeDoorbellDevice::fromDomainModelDevice)
+                .toList();
     }
 
     private void validateUserPermissions(User user, List<DoorbellDevice> doorbells) {
