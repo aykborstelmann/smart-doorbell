@@ -24,5 +24,4 @@ auth0:
   audience: ${AUDIENCE}
 server:
   port: 8080
-
-
+debug: true

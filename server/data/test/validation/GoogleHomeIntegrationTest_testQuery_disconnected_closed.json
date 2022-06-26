@@ -1,0 +1,13 @@
+{
+  "payload" : {
+    "devices" : {
+      "1" : {
+        "isJammed" : false,
+        "online" : false,
+        "isLocked" : true,
+        "status" : "OFFLINE"
+      }
+    }
+  },
+  "requestId" : "17833958777429973331"
+}

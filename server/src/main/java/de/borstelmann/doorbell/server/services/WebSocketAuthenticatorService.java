@@ -15,14 +15,11 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class WebSocketAuthenticatorService {
     private final DoorbellDeviceRepository doorbellDeviceRepository;
-    private final DoorbellStateChangeService doorbellStateChangeService;
 
     public UsernamePasswordAuthenticationToken getAuthenticatedOrFail(final String username, final String password) throws AuthenticationException {
         validateUsernameNotEmpty(username);
 
         DoorbellDevice doorbellDevice = findUserOrThrow(username, password);
-        doorbellStateChangeService.setIsConnected(doorbellDevice.getId(), true);
-
         return new UsernamePasswordAuthenticationToken(
                 doorbellDevice.getId(),
                 null,

@@ -9,7 +9,9 @@ import java.lang.annotation.RetentionPolicy;
 @WithSecurityContext(factory = WithMockOAuth2ScopeSecurityContextFactory.class)
 public @interface WithMockOAuth2Scope {
 
-    long userId() default 0L;
+    long DEFAULT_USER_ID = 0L;
+
+    long userId() default DEFAULT_USER_ID;
 
     String oAuthId() default "oAuthId";
 

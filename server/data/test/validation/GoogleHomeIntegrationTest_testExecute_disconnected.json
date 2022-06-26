@@ -1,0 +1,12 @@
+{
+  "payload" : {
+    "commands" : [ {
+      "ids" : [ "1" ],
+      "status" : "OFFLINE",
+      "states" : {
+        "online" : false
+      }
+    } ]
+  },
+  "requestId" : "4982066045573259553"
+}

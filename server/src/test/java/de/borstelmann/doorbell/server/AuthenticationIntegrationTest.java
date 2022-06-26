@@ -1,12 +1,11 @@
 package de.borstelmann.doorbell.server;
 
-import de.borstelmann.doorbell.server.controller.RequestUtils;
+import de.borstelmann.doorbell.server.test.RequestUtils;
 import de.borstelmann.doorbell.server.test.authentication.OAuthIntegrationTest;
 import org.assertj.core.api.Assertions;
 import org.jose4j.jwk.RsaJsonWebKey;
 import org.jose4j.jwk.RsaJwkGenerator;
 import org.jose4j.jws.AlgorithmIdentifiers;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -16,11 +15,6 @@ import static org.hamcrest.CoreMatchers.not;
 public class AuthenticationIntegrationTest extends OAuthIntegrationTest {
 
     private static final String WRONG_AUDIENCE = "WRONG_AUDIENCE";
-
-    @AfterEach
-    void tearDown() {
-        userRepository.deleteAll();
-    }
 
     @Test
     void testAuthenticate_wrongAudience() throws Exception {

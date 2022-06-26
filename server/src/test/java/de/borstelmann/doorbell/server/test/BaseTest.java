@@ -11,15 +11,31 @@ import java.io.UnsupportedEncodingException;
 
 public abstract class BaseTest implements JUnit5ValidationFileAssertions {
 
-    public void assertWithFormattedJsonFile(String responseBody) {
-        assertWithJsonFile(formatJson(responseBody));
+    protected void assertWithFormattedJsonFile(String responseBody) {
+        assertWithJsonFile(formatJsonString(responseBody));
     }
 
-    public void assertWithFormattedJsonFile(String responseBody, ValidationNormalizer validationNormalizer) {
-        assertWithJsonFile(formatJson(responseBody), validationNormalizer);
+    protected void assertWithFormattedJsonFile(Object object) {
+        assertWithJsonFile(formatJson(object));
     }
 
-    public String formatJson(String json) {
+    protected void assertWithFormattedJsonFile(MvcResult result) throws UnsupportedEncodingException {
+        this.assertWithFormattedJsonFile(result.getResponse().getContentAsString());
+    }
+
+    public void assertWithFormattedJsonFileWithSuffix(Object object, ValidationNormalizer validationNormalizer, String suffix) {
+        assertWithJsonFileWithSuffix(formatJson(object), validationNormalizer, suffix);
+    }
+
+    protected String formatJson(Object object) {
+        try {
+            return getObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected String formatJsonString(String json) {
         if (json.isBlank()) {
             return json;
         }
@@ -35,13 +51,5 @@ public abstract class BaseTest implements JUnit5ValidationFileAssertions {
     @NotNull
     protected ObjectMapper getObjectMapper() {
         return new ObjectMapper();
-    }
-
-    protected void assertWithFormattedJsonFile(MvcResult result) throws UnsupportedEncodingException {
-        this.assertWithFormattedJsonFile(result.getResponse().getContentAsString());
-    }
-
-    protected void assertWithFormattedJsonFile(MvcResult result, ValidationNormalizer validationNormalizer) throws UnsupportedEncodingException {
-        this.assertWithFormattedJsonFile(result.getResponse().getContentAsString(), validationNormalizer);
     }
 }

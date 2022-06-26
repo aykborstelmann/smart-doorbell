@@ -5,8 +5,20 @@ Smart Doorbell for our old house integrated in Google Home
 To see more information about how this project is structured and components interact with eachother see [Overview Page](doc/overview.md)
 
 ## Setup
-### Google 
+### Device
+Inside `devices/buzzer` you will find the code for a doorbell buzzer implemented on a ESP8266 (particularly a wemos d1 mini).
+First copy `include/example_settings.h` to `include/settings.h` and paste your WiFi SSID, password the doorbell server host and port and your 
+newly created doorbell device's id (via API).
 
+Then run `platformio run --target -e d1_mini` to upload the code to your microcontroller (Platformio is required).
+
+### OAuth
+This rest application is secured with OAuth2. Particulary it is a resource server in the Auth0 environment. 
+For this to work you need to set the following two variables (idealy as environment variables).
+* `AUDIENCE` the configured audience for this resource server in Auth0
+* `JWT_ISSUER` probably `https://{TENANT}.us.auth0.com/`
+
+### Google
 ### Add Request Sync and Report State support
 The [Request
 Sync](https://developers.google.com/assistant/smarthome/develop/request-sync)

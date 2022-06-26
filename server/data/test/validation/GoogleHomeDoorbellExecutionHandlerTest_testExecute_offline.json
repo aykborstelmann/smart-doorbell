@@ -1,0 +1,9 @@
+{
+  "ids" : [ "0" ],
+  "status" : "OFFLINE",
+  "states" : {
+    "online" : false
+  },
+  "errorCode" : null,
+  "challengeNeeded" : null
+}

@@ -1,7 +1,9 @@
 package de.borstelmann.doorbell.server.domain.model.security;
 
 import de.borstelmann.doorbell.server.domain.model.User;
+import de.borstelmann.doorbell.server.error.BadRequestException;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -40,10 +42,10 @@ public class CustomUserSession extends AbstractAuthenticationToken {
                 .orElse(null);
     }
 
-    @Nullable
-    public static User getCurrentUser() {
+    @NotNull
+    public static User getCurrentUserOrThrow() {
         return Optional.ofNullable(getCurrentUserSession())
                 .map(CustomUserSession::getUser)
-                .orElse(null);
+                .orElseThrow(() -> new BadRequestException("Current session does not have a user"));
     }
 }
