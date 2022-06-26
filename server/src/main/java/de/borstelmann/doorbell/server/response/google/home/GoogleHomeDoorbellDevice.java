@@ -9,16 +9,23 @@ import java.util.*;
 
 import static de.borstelmann.doorbell.server.response.google.home.DeviceStatus.OFFLINE;
 import static de.borstelmann.doorbell.server.response.google.home.DeviceStatus.SUCCESS;
-import static de.borstelmann.doorbell.server.response.google.home.DeviceTrait.LockUnlockStateKeys.IS_JAMMED;
-import static de.borstelmann.doorbell.server.response.google.home.DeviceTrait.LockUnlockStateKeys.IS_LOCKED;
 
 public class GoogleHomeDoorbellDevice {
 
-    public static final String ONLINE = "online";
-    public static final String STATUS = "status";
-    public static final String TYPE = "action.devices.types.LOCK";
+    public static class PayloadParameter {
+        public static final String STATUS = "status";
+        public static final String IS_LOCKED = "isLocked";
+        public static final String IS_JAMMED = "isJammed";
+        public static final String ONLINE = "online";
 
-    private static final Set<DeviceTrait> TRAITS = Set.of(DeviceTrait.LOCK_UNLOCK);
+        private PayloadParameter() {
+        }
+    }
+
+    public static final String TYPE = "action.devices.types.LOCK";
+    public static final String LOCK_COMMAND = "action.devices.commands.LockUnlock";
+    public static final String LOCK_UNLOCK_TRAIT = "action.devices.traits.LockUnlock";
+
     private static final List<String> DEFAULT_NAMES = Collections.singletonList("Smart Doorbell-Buzzer");
     private static final boolean WILL_REPORT_STATE = true;
 
@@ -52,30 +59,25 @@ public class GoogleHomeDoorbellDevice {
     }
 
     public SyncResponse.Payload.Device getSync() {
-        SyncResponse.Payload.Device.Builder builder = new SyncResponse.Payload.Device.Builder()
+        return new SyncResponse.Payload.Device.Builder()
                 .setType(TYPE)
                 .setId(id)
                 .setName(DEFAULT_NAMES, name, Collections.singletonList(name))
-                .setWillReportState(WILL_REPORT_STATE);
-
-        TRAITS.stream()
-                .map(DeviceTrait::toString)
-                .forEach(builder::addTrait);
-
-        return builder.build();
+                .addTrait(LOCK_UNLOCK_TRAIT)
+                .setWillReportState(WILL_REPORT_STATE).build();
     }
 
     public Map<String, Object> getQueryState() {
         Map<String, Object> state = new HashMap<>(getState());
-        state.put(STATUS, getIsOnline() ? SUCCESS : OFFLINE);
+        state.put(PayloadParameter.STATUS, getIsOnline() ? SUCCESS : OFFLINE);
         return state;
     }
 
     public Map<String, Object> getState() {
         return Map.of(
-                IS_LOCKED, !doorbellDevice.getIsOpened(),
-                IS_JAMMED, false,
-                ONLINE, getIsOnline()
+                PayloadParameter.IS_LOCKED, !doorbellDevice.getIsOpened(),
+                PayloadParameter.IS_JAMMED, false,
+                PayloadParameter.ONLINE, getIsOnline()
         );
     }
 

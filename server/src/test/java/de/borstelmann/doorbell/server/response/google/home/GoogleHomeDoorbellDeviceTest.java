@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static de.borstelmann.doorbell.server.response.google.home.DeviceTrait.LockUnlockStateKeys.IS_JAMMED;
-import static de.borstelmann.doorbell.server.response.google.home.DeviceTrait.LockUnlockStateKeys.IS_LOCKED;
+import static de.borstelmann.doorbell.server.response.google.home.GoogleHomeDoorbellDevice.PayloadParameter.IS_JAMMED;
+import static de.borstelmann.doorbell.server.response.google.home.GoogleHomeDoorbellDevice.PayloadParameter.IS_LOCKED;
 import static de.borstelmann.doorbell.server.response.google.home.GoogleHomeDoorbellDevice.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -59,7 +59,7 @@ class GoogleHomeDoorbellDeviceTest {
         assertThat(googleHomeDoorbellDevice.getState())
                 .containsEntry(IS_LOCKED, !isOpened)
                 .containsEntry(IS_JAMMED, false)
-                .containsEntry(ONLINE, isConnected);
+                .containsEntry(PayloadParameter.ONLINE, isConnected);
     }
 
     @ParameterizedTest
@@ -75,8 +75,8 @@ class GoogleHomeDoorbellDeviceTest {
         assertThat(googleHomeDoorbellDevice.getQueryState())
                 .containsEntry(IS_LOCKED, !isOpened)
                 .containsEntry(IS_JAMMED, false)
-                .containsEntry(ONLINE, isConnected)
-                .containsEntry(STATUS, isConnected ? DeviceStatus.SUCCESS : DeviceStatus.OFFLINE);
+                .containsEntry(PayloadParameter.ONLINE, isConnected)
+                .containsEntry(PayloadParameter.STATUS, isConnected ? DeviceStatus.SUCCESS : DeviceStatus.OFFLINE);
     }
 
     @Test
@@ -94,8 +94,7 @@ class GoogleHomeDoorbellDeviceTest {
         SyncResponse.Payload.Device sync = googleHomeDoorbellDevice.getSync();
         DeviceProto.Device device = sync.getDevice();
         assertThat(device.getId()).isEqualTo(String.valueOf(id));
-        assertThat(device.getTraitsList())
-                .containsExactly(DeviceTrait.LOCK_UNLOCK.toString());
+        assertThat(device.getTraitsList()).containsExactly(LOCK_UNLOCK_TRAIT);
         assertThat(device.getType()).isEqualTo(GoogleHomeDoorbellDevice.TYPE);
 
         assertThat(device.getName().getName()).isEqualTo(name);

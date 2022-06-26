@@ -31,9 +31,9 @@ class GoogleHomeDoorbellExecutionHandlerTest extends BaseTest {
         GoogleHomeDoorbellDevice googleHomeDoorbellDevice = GoogleHomeDoorbellDevice.fromDomainModelDevice(doorbellDevice);
 
         Execution execution = new Execution();
-        execution.setCommand(DeviceCommand.LOCK_COMMAND.toString());
+        execution.setCommand(GoogleHomeDoorbellDevice.LOCK_COMMAND);
         execution.setParams(Map.of(
-                DeviceCommand.LockCommandParamsKeys.LOCK, true
+                GoogleHomeDoorbellExecutionHandler.LOCK_PARAM, true
         ));
 
         ExecuteResponse.Payload.Commands execute = googleHomeDoorbellExecutionHandler.execute(googleHomeDoorbellDevice, execution);
@@ -48,9 +48,9 @@ class GoogleHomeDoorbellExecutionHandlerTest extends BaseTest {
         GoogleHomeDoorbellDevice googleHomeDoorbellDevice = GoogleHomeDoorbellDevice.fromDomainModelDevice(doorbellDevice);
 
         Execution execution = new Execution();
-        execution.setCommand(DeviceCommand.LOCK_COMMAND.toString());
+        execution.setCommand(GoogleHomeDoorbellDevice.LOCK_COMMAND);
         execution.setParams(Map.of(
-                DeviceCommand.LockCommandParamsKeys.LOCK, false
+                GoogleHomeDoorbellExecutionHandler.LOCK_PARAM, false
         ));
 
         ExecuteResponse.Payload.Commands execute = googleHomeDoorbellExecutionHandler.execute(googleHomeDoorbellDevice, execution);
@@ -65,7 +65,7 @@ class GoogleHomeDoorbellExecutionHandlerTest extends BaseTest {
         GoogleHomeDoorbellDevice googleHomeDoorbellDevice = GoogleHomeDoorbellDevice.fromDomainModelDevice(doorbellDevice);
 
         Execution execution = new Execution();
-        execution.setCommand(DeviceCommand.LOCK_COMMAND.toString());
+        execution.setCommand(GoogleHomeDoorbellDevice.LOCK_COMMAND);
         execution.setParams(Map.of());
 
         ExecuteResponse.Payload.Commands execute = googleHomeDoorbellExecutionHandler.execute(googleHomeDoorbellDevice, execution);
@@ -80,9 +80,9 @@ class GoogleHomeDoorbellExecutionHandlerTest extends BaseTest {
         GoogleHomeDoorbellDevice googleHomeDoorbellDevice = GoogleHomeDoorbellDevice.fromDomainModelDevice(doorbellDevice);
 
         Execution execution = new Execution();
-        execution.setCommand(DeviceCommand.LOCK_COMMAND.toString());
+        execution.setCommand(GoogleHomeDoorbellDevice.LOCK_COMMAND);
         execution.setParams(Map.of(
-                DeviceCommand.LockCommandParamsKeys.LOCK, false
+                GoogleHomeDoorbellExecutionHandler.LOCK_PARAM, false
         ));
 
         ExecuteResponse.Payload.Commands execute = googleHomeDoorbellExecutionHandler.execute(googleHomeDoorbellDevice, execution);
@@ -99,7 +99,7 @@ class GoogleHomeDoorbellExecutionHandlerTest extends BaseTest {
         Execution execution = new Execution();
         execution.setCommand("action.devices.commands.WrongCommand");
         execution.setParams(Map.of(
-                DeviceCommand.LockCommandParamsKeys.LOCK, false
+                GoogleHomeDoorbellExecutionHandler.LOCK_PARAM, false
         ));
 
         ExecuteResponse.Payload.Commands execute = googleHomeDoorbellExecutionHandler.execute(googleHomeDoorbellDevice, execution);

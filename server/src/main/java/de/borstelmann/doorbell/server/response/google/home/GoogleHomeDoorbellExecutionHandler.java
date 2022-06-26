@@ -12,20 +12,17 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.Optional;
 
-import static de.borstelmann.doorbell.server.response.google.home.DeviceCommand.LockCommandParamsKeys.LOCK;
-
 @Component
 @RequiredArgsConstructor
 public class GoogleHomeDoorbellExecutionHandler {
-
+    public static final String LOCK_PARAM = "lock";
     private final DoorbellBuzzerStateService doorbellBuzzerStateService;
 
     public ExecuteResponse.Payload.Commands execute(GoogleHomeDoorbellDevice device, ExecuteRequest.Inputs.Payload.Commands.Execution execution) {
-        DeviceCommand deviceCommand = DeviceCommand.fromCommandName(execution.getCommand());
         Map<String, Object> params = execution.getParams();
 
         try {
-            return executeCommand(device, deviceCommand, params);
+            return executeCommand(device, execution.getCommand(), params);
         } catch (OfflineException e) {
             return makeOfflineResponse(device.getId());
         } catch (UnsupportedOperationException | ParameterNotAvailableException e) {
@@ -33,15 +30,15 @@ public class GoogleHomeDoorbellExecutionHandler {
         }
     }
 
-    private ExecuteResponse.Payload.Commands executeCommand(GoogleHomeDoorbellDevice device, DeviceCommand command, @Nullable Map<String, Object> parameters) {
-        if (command != DeviceCommand.LOCK_COMMAND) {
+    private ExecuteResponse.Payload.Commands executeCommand(GoogleHomeDoorbellDevice device, String command, @Nullable Map<String, Object> parameters) {
+        if (!GoogleHomeDoorbellDevice.LOCK_COMMAND.equals(command)) {
             throw new UnsupportedOperationException();
         }
         if (!device.getIsOnline()) {
             throw new OfflineException();
         }
 
-        boolean shouldLock = getParameter(parameters, Boolean.class, LOCK);
+        boolean shouldLock = getParameter(parameters, Boolean.class, LOCK_PARAM);
 
         if (shouldLock) {
             doorbellBuzzerStateService.closeDoor(Long.valueOf(device.getId()));
@@ -66,7 +63,7 @@ public class GoogleHomeDoorbellExecutionHandler {
 
     public static ExecuteResponse.Payload.Commands makeOfflineResponse(String id) {
         ExecuteResponse.Payload.Commands commands = makeResponse(DeviceStatus.OFFLINE, id);
-        commands.setStates(Map.of(GoogleHomeDoorbellDevice.ONLINE, false));
+        commands.setStates(Map.of(GoogleHomeDoorbellDevice.PayloadParameter.ONLINE, false));
         return commands;
     }
 
