@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
@@ -26,7 +25,7 @@ public class GoogleHomeExecutionService {
         return Arrays.stream(commands)
                 .map(this::executeCommand)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private List<ExecuteResponse.Payload.Commands> executeCommand(Commands command) {
@@ -38,7 +37,7 @@ public class GoogleHomeExecutionService {
             return googleHomeDeviceService.getDevicesForUser(user, deviceIds)
                     .stream()
                     .flatMap(device -> mapToExecutedCommands(executions, device))
-                    .collect(Collectors.toList());
+                    .toList();
         } catch (ForbiddenException e) {
             return List.of(
                     GoogleHomeDoorbellExecutionHandler.makeExceptionResponse(String.valueOf(e.getId())));
@@ -54,7 +53,7 @@ public class GoogleHomeExecutionService {
         return Arrays.stream(command.getDevices())
                 .map(Commands.Devices::getId)
                 .map(Long::parseLong)
-                .collect(Collectors.toList());
+                .toList();
     }
 
 }
