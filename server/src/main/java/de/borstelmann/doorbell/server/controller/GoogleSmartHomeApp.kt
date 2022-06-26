@@ -22,7 +22,11 @@ import java.lang.IllegalArgumentException
 import java.util.*
 
 @Component
-class DoorbellSmartHomeApp(private val googleHomeExecutionService: GoogleHomeExecutionService, val googleHomeDeviceService: GoogleHomeDeviceService, val doorbellService: DoorbellService) : SmartHomeApp() {
+class GoogleSmartHomeApp(
+        private val googleHomeExecutionService: GoogleHomeExecutionService,
+        private val googleHomeDeviceService: GoogleHomeDeviceService,
+        private val doorbellService: DoorbellService
+) : SmartHomeApp() {
 
     private val log = LoggerFactory.getLogger(this.javaClass)
 
