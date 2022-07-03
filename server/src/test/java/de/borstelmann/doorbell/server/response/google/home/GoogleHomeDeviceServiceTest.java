@@ -93,7 +93,8 @@ class GoogleHomeDeviceServiceTest {
         SAMPLE_DOORBELL.setUser(User.builder().id(1L).build());
         doReturn(List.of(SAMPLE_DOORBELL)).when(doorbellDeviceRepository).findAllById(List.of(SAMPLE_DOORBELL.getId()));
 
-        ForbiddenException forbiddenException = catchThrowableOfType(() -> googleHomeDeviceService.getDevicesForUser(SAMPLE_USER, List.of(DOORBELL_ID)), ForbiddenException.class);
+        List<Long> doorbellIds = List.of(DOORBELL_ID);
+        ForbiddenException forbiddenException = catchThrowableOfType(() -> googleHomeDeviceService.getDevicesForUser(SAMPLE_USER, doorbellIds), ForbiddenException.class);
         assertThat(forbiddenException.getId()).isEqualTo(DOORBELL_ID);
     }
 
