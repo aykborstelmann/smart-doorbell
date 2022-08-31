@@ -9,8 +9,8 @@ import de.borstelmann.doorbell.server.domain.repository.DoorbellDeviceRepository
 import de.borstelmann.doorbell.server.domain.repository.UserRepository;
 import de.borstelmann.doorbell.server.error.BadRequestException;
 import de.borstelmann.doorbell.server.error.ForbiddenException;
+import de.borstelmann.doorbell.server.services.AuthenticationService;
 import de.borstelmann.doorbell.server.services.DoorbellService;
-import de.borstelmann.doorbell.server.test.authentication.WithMockOAuth2Scope;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -22,7 +22,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -53,14 +52,19 @@ class GoogleHomeDeviceServiceTest {
     @MockBean
     private GoogleHomeDoorbellExecutionHandler googleHomeDoorbellExecutionHandler;
 
+    @MockBean
+    private AuthenticationService authenticationService;
+
     @SpyBean
     private GoogleHomeDeviceService googleHomeDeviceService;
 
     @Test
     void testGetAllDevicesForUser() {
+        withSampleUserLoggedIn();
+
         doReturn(Optional.of(SAMPLE_USER)).when(userRepository).findById(USER_ID);
 
-        List<? extends GoogleHomeDoorbellDevice> allDevicesForUser = googleHomeDeviceService.getAllDevicesForUser(SAMPLE_USER);
+        List<? extends GoogleHomeDoorbellDevice> allDevicesForUser = googleHomeDeviceService.getAllDevicesForUser();
         assertThat(allDevicesForUser)
                 .hasSize(1)
                 .hasOnlyElementsOfType(GoogleHomeDoorbellDevice.class)
@@ -71,10 +75,12 @@ class GoogleHomeDeviceServiceTest {
 
     @Test
     void testGetDevicesForUser() {
+        withSampleUserLoggedIn();
+
         SAMPLE_DOORBELL.setUser(SAMPLE_USER);
         doReturn(List.of(SAMPLE_DOORBELL)).when(doorbellDeviceRepository).findAllById(List.of(SAMPLE_DOORBELL.getId()));
 
-        List<? extends GoogleHomeDoorbellDevice> devicesForUser = googleHomeDeviceService.getDevicesForUser(SAMPLE_USER, List.of(DOORBELL_ID));
+        List<? extends GoogleHomeDoorbellDevice> devicesForUser = googleHomeDeviceService.getDevicesForUser(List.of(DOORBELL_ID));
         assertThat(devicesForUser)
                 .hasSize(1)
                 .hasOnlyElementsOfType(GoogleHomeDoorbellDevice.class)
@@ -84,13 +90,15 @@ class GoogleHomeDeviceServiceTest {
 
     @Test
     void testGetDevicesForUser_notBelongsToUser() {
+        withSampleUserLoggedIn();
+
         User differentUser = User.builder().id(1L).build();
         SAMPLE_DOORBELL.setUser(differentUser);
         doReturn(List.of(SAMPLE_DOORBELL)).when(doorbellDeviceRepository).findAllById(List.of(SAMPLE_DOORBELL.getId()));
 
         List<Long> doorbellIds = List.of(DOORBELL_ID);
         ForbiddenException forbiddenException = catchThrowableOfType(
-                () -> googleHomeDeviceService.getDevicesForUser(SAMPLE_USER, doorbellIds),
+                () -> googleHomeDeviceService.getDevicesForUser(doorbellIds),
                 ForbiddenException.class
         );
         assertThat(forbiddenException.getId()).isEqualTo(DOORBELL_ID);
@@ -98,6 +106,8 @@ class GoogleHomeDeviceServiceTest {
 
     @Test
     void testGetDevice() {
+        withSampleUserLoggedIn();
+
         doReturn(Optional.of(SAMPLE_DOORBELL)).when(doorbellDeviceRepository).findById(DOORBELL_ID);
 
         GoogleHomeDoorbellDevice device = googleHomeDeviceService.getDevice(DOORBELL_ID);
@@ -106,7 +116,6 @@ class GoogleHomeDeviceServiceTest {
     }
 
     @Test
-    @WithMockOAuth2Scope
     void testExecute_empty() {
         ExecuteRequest.Inputs.Payload.Commands[] commands = new ExecuteRequest.Inputs.Payload.Commands[]{};
 
@@ -117,8 +126,9 @@ class GoogleHomeDeviceServiceTest {
     }
 
     @Test
-    @WithMockOAuth2Scope
     void testExecute() {
+        withSampleUserLoggedIn();
+
         ExecuteRequest.Inputs.Payload.Commands.Devices device = new ExecuteRequest.Inputs.Payload.Commands.Devices();
         device.id = "0";
         ExecuteRequest.Inputs.Payload.Commands.Execution execution = new ExecuteRequest.Inputs.Payload.Commands.Execution();
@@ -130,7 +140,7 @@ class GoogleHomeDeviceServiceTest {
         ExecuteRequest.Inputs.Payload.Commands[] commands = new ExecuteRequest.Inputs.Payload.Commands[]{command};
 
         GoogleHomeDoorbellDevice googleHomeDoorbellDevice = GoogleHomeDoorbellDevice.fromDomainModelDevice(new DoorbellDevice());
-        doReturn(List.of(googleHomeDoorbellDevice)).when(googleHomeDeviceService).getDevicesForUser(userWithId(), eq(List.of(0L)));
+        doReturn(List.of(googleHomeDoorbellDevice)).when(googleHomeDeviceService).getDevicesForUser(List.of(0L));
 
         List<ExecuteResponse.Payload.Commands> executeResult = googleHomeDeviceService.execute(commands);
         assertThat(executeResult)
@@ -140,8 +150,9 @@ class GoogleHomeDeviceServiceTest {
     }
 
     @Test
-    @WithMockOAuth2Scope
     void testExecute_multipleDevices() {
+        withSampleUserLoggedIn();
+
         long firstDeviceId = 0L;
         long secondDeviceId = 1L;
 
@@ -165,7 +176,7 @@ class GoogleHomeDeviceServiceTest {
         doReturn(List.of(
                 firstGoogleHomeDevice,
                 secondGoogleHomeDevice
-        )).when(googleHomeDeviceService).getDevicesForUser(userWithId(), eq(List.of(firstDeviceId, secondDeviceId)));
+        )).when(googleHomeDeviceService).getDevicesForUser(List.of(firstDeviceId, secondDeviceId));
 
         List<ExecuteResponse.Payload.Commands> executeResult = googleHomeDeviceService.execute(commands);
         assertThat(executeResult)
@@ -176,8 +187,9 @@ class GoogleHomeDeviceServiceTest {
     }
 
     @Test
-    @WithMockOAuth2Scope
     void testExecute_multipleCommands() {
+        withSampleUserLoggedIn();
+
         ExecuteRequest.Inputs.Payload.Commands.Devices device = new ExecuteRequest.Inputs.Payload.Commands.Devices();
         device.id = "0";
         ExecuteRequest.Inputs.Payload.Commands.Execution firstExecution = new ExecuteRequest.Inputs.Payload.Commands.Execution();
@@ -194,7 +206,7 @@ class GoogleHomeDeviceServiceTest {
         ExecuteRequest.Inputs.Payload.Commands[] commands = new ExecuteRequest.Inputs.Payload.Commands[]{firstCommand, secondCommand};
 
         GoogleHomeDoorbellDevice googleHomeDoorbellDevice = GoogleHomeDoorbellDevice.fromDomainModelDevice(new DoorbellDevice());
-        doReturn(List.of(googleHomeDoorbellDevice)).when(googleHomeDeviceService).getDevicesForUser(userWithId(), eq(List.of(0L)));
+        doReturn(List.of(googleHomeDoorbellDevice)).when(googleHomeDeviceService).getDevicesForUser(List.of(0L));
 
         List<ExecuteResponse.Payload.Commands> executeResult = googleHomeDeviceService.execute(commands);
         assertThat(executeResult)
@@ -206,6 +218,8 @@ class GoogleHomeDeviceServiceTest {
 
     @Test
     void testExecute_noUser() {
+        withNoUserLoggedIn();
+
         ExecuteRequest.Inputs.Payload.Commands.Devices device = new ExecuteRequest.Inputs.Payload.Commands.Devices();
         device.id = "0";
         ExecuteRequest.Inputs.Payload.Commands.Execution execution = new ExecuteRequest.Inputs.Payload.Commands.Execution();
@@ -215,16 +229,18 @@ class GoogleHomeDeviceServiceTest {
         command.setExecution(new ExecuteRequest.Inputs.Payload.Commands.Execution[]{execution});
 
         ExecuteRequest.Inputs.Payload.Commands[] commands = new ExecuteRequest.Inputs.Payload.Commands[]{command};
-
-        GoogleHomeDoorbellDevice googleHomeDoorbellDevice = GoogleHomeDoorbellDevice.fromDomainModelDevice(new DoorbellDevice());
-        doReturn(List.of(googleHomeDoorbellDevice)).when(googleHomeDeviceService).getDevicesForUser(userWithId(), eq(List.of(0L)));
+        doReturn(List.of(SAMPLE_DOORBELL)).when(doorbellDeviceRepository).findAllById(List.of(SAMPLE_DOORBELL.getId()));
 
         assertThatThrownBy(() -> googleHomeDeviceService.execute(commands)).isInstanceOf(BadRequestException.class);
-
-        verify(googleHomeDoorbellExecutionHandler, never()).execute(googleHomeDoorbellDevice, execution);
+        verify(googleHomeDoorbellExecutionHandler, never()).execute(any(), any());
     }
 
-    private User userWithId() {
-        return argThat(user -> user.getId() == WithMockOAuth2Scope.DEFAULT_USER_ID);
+    private void withNoUserLoggedIn() {
+        doThrow(new BadRequestException("Current session does not have a user")).when(authenticationService).getCurrentUserOrThrow();
+    }
+
+
+    private void withSampleUserLoggedIn() {
+        doReturn(SAMPLE_USER).when(authenticationService).getCurrentUserOrThrow();
     }
 }

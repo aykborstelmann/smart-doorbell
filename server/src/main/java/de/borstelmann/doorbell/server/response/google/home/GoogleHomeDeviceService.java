@@ -9,9 +9,9 @@ import com.google.api.services.homegraph.v1.model.ReportStateAndNotificationResp
 import com.google.api.services.homegraph.v1.model.StateAndNotificationPayload;
 import de.borstelmann.doorbell.server.domain.model.DoorbellDevice;
 import de.borstelmann.doorbell.server.domain.model.User;
-import de.borstelmann.doorbell.server.domain.model.security.CustomUserSession;
 import de.borstelmann.doorbell.server.domain.repository.DoorbellDeviceRepository;
 import de.borstelmann.doorbell.server.error.ForbiddenException;
+import de.borstelmann.doorbell.server.services.AuthenticationService;
 import de.borstelmann.doorbell.server.services.DoorbellService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,14 +29,17 @@ public class GoogleHomeDeviceService {
     private final DoorbellService doorbellService;
     private final DoorbellDeviceRepository doorbellDeviceRepository;
     private final GoogleHomeDoorbellExecutionHandler executionHandler;
+    private final AuthenticationService authenticationService;
     private HomeGraphService homeGraphService;
 
-    public List<GoogleHomeDoorbellDevice> getAllDevicesForUser(User user) {
+    public List<GoogleHomeDoorbellDevice> getAllDevicesForUser() {
+        User user = authenticationService.getCurrentUserOrThrow();
         List<DoorbellDevice> doorbells = doorbellService.getAllDoorbells(user.getId());
         return mapToGoogleHomeDoorbellDevice(doorbells);
     }
 
-    public List<GoogleHomeDoorbellDevice> getDevicesForUser(User user, List<Long> devices) {
+    public List<GoogleHomeDoorbellDevice> getDevicesForUser(List<Long> devices) {
+        User user = authenticationService.getCurrentUserOrThrow();
         List<DoorbellDevice> doorbells = doorbellDeviceRepository.findAllById(devices);
         validateUserPermissions(user, doorbells);
         return mapToGoogleHomeDoorbellDevice(doorbells);
@@ -74,10 +77,9 @@ public class GoogleHomeDeviceService {
     private List<ExecuteResponse.Payload.Commands> executeCommand(ExecuteRequest.Inputs.Payload.Commands command) {
         List<Long> deviceIds = getDeviceIds(command);
         ExecuteRequest.Inputs.Payload.Commands.Execution[] executions = command.getExecution();
-        User user = CustomUserSession.getCurrentUserOrThrow();
 
         try {
-            return getDevicesForUser(user, deviceIds)
+            return getDevicesForUser(deviceIds)
                     .stream()
                     .flatMap(device ->
                             Arrays.stream(executions)

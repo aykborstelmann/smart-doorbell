@@ -1,15 +1,15 @@
 package de.borstelmann.doorbell.server.controller
 
 import com.google.actions.api.smarthome.*
-import de.borstelmann.doorbell.server.domain.model.User
-import de.borstelmann.doorbell.server.domain.model.security.CustomUserSession
 import de.borstelmann.doorbell.server.response.google.home.GoogleHomeDeviceService
+import de.borstelmann.doorbell.server.services.AuthenticationService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class GoogleSmartHomeApp(
-        private val googleHomeDeviceService: GoogleHomeDeviceService
+        private val googleHomeDeviceService: GoogleHomeDeviceService,
+        private val authenticationService: AuthenticationService
 ) : SmartHomeApp() {
 
     private val log = LoggerFactory.getLogger(this.javaClass)
@@ -34,21 +34,19 @@ class GoogleSmartHomeApp(
         val queryResponse = QueryResponse()
         queryResponse.requestId = request.requestId
 
-        val user = CustomUserSession.getCurrentUserOrThrow()
-
         val inputs = getQueryRequestInputs(request)
         val devices = inputs.payload.devices
         queryResponse.payload = QueryResponse.Payload()
-        queryResponse.payload.devices = getStatePerDevice(user, devices)
+        queryResponse.payload.devices = getStatePerDevice(devices)
         return queryResponse
     }
 
-    private fun getStatePerDevice(user: User, devices: Array<QueryRequest.Inputs.Payload.Device>): Map<String, Map<String, Any>> {
+    private fun getStatePerDevice(devices: Array<QueryRequest.Inputs.Payload.Device>): Map<String, Map<String, Any>> {
         val deviceIds = devices.map { it.id.toLong() }
                 .distinct()
                 .toList()
 
-        return googleHomeDeviceService.getDevicesForUser(user, deviceIds)
+        return googleHomeDeviceService.getDevicesForUser(deviceIds)
                 .associateBy(keySelector = { it.id }, valueTransform = { it.queryState })
     }
 
@@ -57,10 +55,10 @@ class GoogleSmartHomeApp(
         syncResponse.requestId = request.requestId
         syncResponse.payload = SyncResponse.Payload()
 
-        val user = CustomUserSession.getCurrentUserOrThrow()
+        val user = authenticationService.getCurrentUserOrThrow()
 
         syncResponse.payload.agentUserId = user.id.toString()
-        syncResponse.payload.devices = googleHomeDeviceService.getAllDevicesForUser(user)
+        syncResponse.payload.devices = googleHomeDeviceService.getAllDevicesForUser()
                 .map { it.sync }
                 .toTypedArray()
 
