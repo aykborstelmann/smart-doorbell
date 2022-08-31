@@ -12,7 +12,6 @@ import de.borstelmann.doorbell.server.error.ForbiddenException;
 import de.borstelmann.doorbell.server.services.DoorbellService;
 import de.borstelmann.doorbell.server.test.authentication.WithMockOAuth2Scope;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ContextConfiguration;
@@ -58,19 +57,17 @@ class GoogleHomeDeviceServiceTest {
     private GoogleHomeDeviceService googleHomeDeviceService;
 
     @Test
-    void testGetAllByUser() {
+    void testGetAllDevicesForUser() {
         doReturn(Optional.of(SAMPLE_USER)).when(userRepository).findById(USER_ID);
 
         List<? extends GoogleHomeDoorbellDevice> allDevicesForUser = googleHomeDeviceService.getAllDevicesForUser(SAMPLE_USER);
         assertThat(allDevicesForUser)
-                .satisfiesExactly((device) -> {
-                    assertThat(device)
-                            .isInstanceOf(GoogleHomeDoorbellDevice.class);
+                .hasSize(1)
+                .hasOnlyElementsOfType(GoogleHomeDoorbellDevice.class)
+                .extracting(GoogleHomeDoorbellDevice::getId)
+                .containsExactly(String.valueOf(SAMPLE_DOORBELL.getId()));
+        }
 
-                    var googleHomeDoorbellDevice = (GoogleHomeDoorbellDevice) device;
-                    assertThat(googleHomeDoorbellDevice.getId()).isEqualTo(String.valueOf(SAMPLE_DOORBELL.getId()));
-                });
-    }
 
     @Test
     void testGetDevicesForUser() {
@@ -79,22 +76,23 @@ class GoogleHomeDeviceServiceTest {
 
         List<? extends GoogleHomeDoorbellDevice> devicesForUser = googleHomeDeviceService.getDevicesForUser(SAMPLE_USER, List.of(DOORBELL_ID));
         assertThat(devicesForUser)
-                .satisfiesExactly((device) -> {
-                    assertThat(device)
-                            .isInstanceOf(GoogleHomeDoorbellDevice.class);
-
-                    var googleHomeDoorbellDevice = (GoogleHomeDoorbellDevice) device;
-                    assertThat(googleHomeDoorbellDevice.getId()).isEqualTo(String.valueOf(SAMPLE_DOORBELL.getId()));
-                });
+                .hasSize(1)
+                .hasOnlyElementsOfType(GoogleHomeDoorbellDevice.class)
+                .extracting(GoogleHomeDoorbellDevice::getId)
+                .containsExactly(String.valueOf(SAMPLE_DOORBELL.getId()));
     }
 
     @Test
     void testGetDevicesForUser_notBelongsToUser() {
-        SAMPLE_DOORBELL.setUser(User.builder().id(1L).build());
+        User differentUser = User.builder().id(1L).build();
+        SAMPLE_DOORBELL.setUser(differentUser);
         doReturn(List.of(SAMPLE_DOORBELL)).when(doorbellDeviceRepository).findAllById(List.of(SAMPLE_DOORBELL.getId()));
 
         List<Long> doorbellIds = List.of(DOORBELL_ID);
-        ForbiddenException forbiddenException = catchThrowableOfType(() -> googleHomeDeviceService.getDevicesForUser(SAMPLE_USER, doorbellIds), ForbiddenException.class);
+        ForbiddenException forbiddenException = catchThrowableOfType(
+                () -> googleHomeDeviceService.getDevicesForUser(SAMPLE_USER, doorbellIds),
+                ForbiddenException.class
+        );
         assertThat(forbiddenException.getId()).isEqualTo(DOORBELL_ID);
     }
 
