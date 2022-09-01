@@ -15,11 +15,13 @@ import de.borstelmann.doorbell.server.services.AuthenticationService;
 import de.borstelmann.doorbell.server.services.DoorbellService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Component
 @Slf4j
@@ -81,13 +83,16 @@ public class GoogleHomeDeviceService {
         try {
             return getDevicesForUser(deviceIds)
                     .stream()
-                    .flatMap(device ->
-                            Arrays.stream(executions)
-                                    .map(execution -> executionHandler.execute(device, execution)))
+                    .flatMap(device -> executeExecutionsForDevice(executions, device))
                     .toList();
         } catch (ForbiddenException e) {
             return List.of(GoogleHomeExecuteResponseUtil.makeExceptionResponse(String.valueOf(e.getId())));
         }
+    }
+
+    private Stream<ExecuteResponse.Payload.Commands> executeExecutionsForDevice(ExecuteRequest.Inputs.Payload.Commands.Execution[] executions, GoogleHomeDoorbellDevice device) {
+        return Arrays.stream(executions)
+                .map(execution -> executionHandler.execute(device, execution));
     }
 
     private List<Long> getDeviceIds(ExecuteRequest.Inputs.Payload.Commands command) {
