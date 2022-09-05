@@ -2,6 +2,7 @@ package de.borstelmann.doorbell.server.response.google.home;
 
 import com.google.actions.api.smarthome.ExecuteRequest;
 import com.google.actions.api.smarthome.ExecuteResponse;
+import com.google.api.client.googleapis.GoogleUtils;
 import com.google.api.services.homegraph.v1.HomeGraphService;
 import de.borstelmann.doorbell.server.domain.model.DoorbellDevice;
 import de.borstelmann.doorbell.server.domain.model.User;
@@ -214,6 +215,30 @@ class GoogleHomeDeviceServiceTest {
 
         verify(googleHomeDoorbellExecutionHandler).execute(googleHomeDoorbellDevice, firstExecution);
         verify(googleHomeDoorbellExecutionHandler).execute(googleHomeDoorbellDevice, secondExecution);
+    }
+
+    @Test
+    void testExecute_wrongUser() {
+        withSampleUserLoggedIn();
+
+        ExecuteRequest.Inputs.Payload.Commands.Devices device = new ExecuteRequest.Inputs.Payload.Commands.Devices();
+        device.id = "0";
+        ExecuteRequest.Inputs.Payload.Commands.Execution execution = new ExecuteRequest.Inputs.Payload.Commands.Execution();
+
+        ExecuteRequest.Inputs.Payload.Commands command = new ExecuteRequest.Inputs.Payload.Commands();
+        command.setDevices(new ExecuteRequest.Inputs.Payload.Commands.Devices[]{device});
+        command.setExecution(new ExecuteRequest.Inputs.Payload.Commands.Execution[]{execution});
+
+        ExecuteRequest.Inputs.Payload.Commands[] commands = new ExecuteRequest.Inputs.Payload.Commands[]{command};
+        doReturn(List.of(SAMPLE_DOORBELL)).when(doorbellDeviceRepository).findAllById(List.of(0L));
+        SAMPLE_DOORBELL.setUser(User.builder().id(2L).build());
+
+        List<ExecuteResponse.Payload.Commands> response = googleHomeDeviceService.execute(commands);
+        assertThat(response)
+                .hasSize(1)
+                .first()
+                .extracting(ExecuteResponse.Payload.Commands::getStatus)
+                .isEqualTo("EXCEPTIONS");
     }
 
     @Test
