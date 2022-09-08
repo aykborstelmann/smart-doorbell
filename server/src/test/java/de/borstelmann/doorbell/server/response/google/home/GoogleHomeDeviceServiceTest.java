@@ -4,6 +4,8 @@ import com.google.actions.api.smarthome.ExecuteRequest;
 import com.google.actions.api.smarthome.ExecuteResponse;
 import com.google.api.client.googleapis.GoogleUtils;
 import com.google.api.services.homegraph.v1.HomeGraphService;
+import com.google.api.services.homegraph.v1.model.ReportStateAndNotificationRequest;
+import com.google.api.services.homegraph.v1.model.StateAndNotificationPayload;
 import de.borstelmann.doorbell.server.domain.model.DoorbellDevice;
 import de.borstelmann.doorbell.server.domain.model.User;
 import de.borstelmann.doorbell.server.domain.repository.DoorbellDeviceRepository;
@@ -13,13 +15,16 @@ import de.borstelmann.doorbell.server.error.ForbiddenException;
 import de.borstelmann.doorbell.server.services.AuthenticationService;
 import de.borstelmann.doorbell.server.services.DoorbellService;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -258,6 +263,38 @@ class GoogleHomeDeviceServiceTest {
 
         assertThatThrownBy(() -> googleHomeDeviceService.execute(commands)).isInstanceOf(BadRequestException.class);
         verify(googleHomeDoorbellExecutionHandler, never()).execute(any(), any());
+    }
+
+    @Test
+    void testReportDeviceState() throws IOException {
+        HomeGraphService homeGraphService = mock(HomeGraphService.class);
+        HomeGraphService.Devices devices = mock(HomeGraphService.Devices.class);
+        HomeGraphService.Devices.ReportStateAndNotification reportStateAndNotification = mock(HomeGraphService.Devices.ReportStateAndNotification.class);
+
+        doReturn(devices).when(homeGraphService).devices();
+        doReturn(reportStateAndNotification).when(devices).reportStateAndNotification(any());
+        ArgumentCaptor<ReportStateAndNotificationRequest> captor = ArgumentCaptor.forClass(ReportStateAndNotificationRequest.class);
+        googleHomeDeviceService.setHomeGraphService(homeGraphService);
+
+        SAMPLE_DOORBELL.setUser(SAMPLE_USER);
+        doReturn(Optional.of(SAMPLE_DOORBELL)).when(doorbellDeviceRepository).findById(SAMPLE_DOORBELL.getId());
+
+        googleHomeDeviceService.reportDeviceState(SAMPLE_DOORBELL.getId());
+        verify(devices).reportStateAndNotification(captor.capture());
+
+        ReportStateAndNotificationRequest request = captor.getValue();
+        assertThat(request.getRequestId()).isNotBlank();
+        assertThat(request.getAgentUserId()).isEqualTo(SAMPLE_USER.getId().toString());
+
+        assertThat(request.getPayload().getDevices().getStates())
+                .extractingByKey(SAMPLE_DOORBELL.getId().toString())
+                .asInstanceOf(MAP)
+                .contains(
+                        entry(GoogleHomePayloadAttributes.IS_JAMMED, false),
+                        entry(GoogleHomePayloadAttributes.IS_LOCKED, true),
+                        entry(GoogleHomePayloadAttributes.ONLINE, false)
+                );
+
     }
 
     private void withNoUserLoggedIn() {
