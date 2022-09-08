@@ -15,16 +15,16 @@ public abstract class BaseTest implements JUnit5ValidationFileAssertions {
         assertWithJsonFile(formatJsonString(responseBody));
     }
 
+    public void assertWithFormattedJsonFileWithSuffix(String responseBody, ValidationNormalizer validationNormalizer, String suffix) {
+        assertWithJsonFileWithSuffix(formatJsonString(responseBody), validationNormalizer, suffix);
+    }
+
     protected void assertWithFormattedJsonFile(Object object) {
         assertWithJsonFile(formatJson(object));
     }
 
     protected void assertWithFormattedJsonFile(MvcResult result) throws UnsupportedEncodingException {
         this.assertWithFormattedJsonFile(result.getResponse().getContentAsString());
-    }
-
-    public void assertWithFormattedJsonFileWithSuffix(Object object, ValidationNormalizer validationNormalizer, String suffix) {
-        assertWithJsonFileWithSuffix(formatJson(object), validationNormalizer, suffix);
     }
 
     protected String formatJson(Object object) {
@@ -36,7 +36,7 @@ public abstract class BaseTest implements JUnit5ValidationFileAssertions {
     }
 
     protected String formatJsonString(String json) {
-        if (json.isBlank()) {
+        if (json == null || json.isBlank()) {
             return json;
         }
 
