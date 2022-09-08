@@ -57,6 +57,7 @@ dependencies {
     testImplementation 'de.cronn:validation-file-assertions:0.2.0'
     testImplementation 'org.awaitility:awaitility:4.2.0'
     testImplementation 'de.cronn:test-utils:0.3.0'
+    testImplementation 'com.squareup.okhttp3:mockwebserver'
 }
 
 dependencyManagement {
