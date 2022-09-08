@@ -36,7 +36,7 @@ public abstract class SpringIntegrationTest implements JUnit5ValidationFileAsser
     protected DoorbellDeviceRepository doorbellDeviceRepository;
 
     @AfterEach
-    protected void tearDown(@Autowired H2Util h2Util) {
+    protected void resetDatabase(@Autowired H2Util h2Util) {
         h2Util.resetDatabase();
     }
 

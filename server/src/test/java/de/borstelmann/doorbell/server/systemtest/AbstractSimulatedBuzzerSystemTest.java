@@ -47,10 +47,8 @@ public abstract class AbstractSimulatedBuzzerSystemTest extends OAuthIntegration
     }
 
     @AfterEach
-    @Override
-    protected void tearDown(@Autowired H2Util h2Util) {
+    protected void resetSimulator() {
         doorbellBuzzerSimulator.reset();
-        super.tearDown(h2Util);
     }
 
     private String webSocketUrl() {

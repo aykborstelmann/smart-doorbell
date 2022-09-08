@@ -49,14 +49,11 @@ public class WebSocketIntegrationTest extends OAuthIntegrationTest {
     }
 
     @AfterEach
-    @Override
-    public void tearDown(@Autowired H2Util h2Util) {
+    public void disconnectStompSession() {
         if (stompSession.isConnected()) {
             stompSession.disconnect();
             await().until(() -> !stompSession.isConnected());
         }
-
-        super.tearDown(h2Util);
     }
 
     @Test
