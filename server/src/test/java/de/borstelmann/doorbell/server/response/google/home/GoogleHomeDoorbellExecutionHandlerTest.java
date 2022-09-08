@@ -4,7 +4,7 @@ import com.google.actions.api.smarthome.ExecuteRequest.Inputs.Payload.Commands.E
 import com.google.actions.api.smarthome.ExecuteResponse;
 import de.borstelmann.doorbell.server.domain.model.DoorbellDevice;
 import de.borstelmann.doorbell.server.services.DoorbellBuzzerStateService;
-import de.borstelmann.doorbell.server.test.BaseTest;
+import de.borstelmann.doorbell.server.test.JUnit5ValidationFileAssertionsWithJsonFormatting;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
 
 @SpringJUnitConfig
 @ContextConfiguration(classes = GoogleHomeDoorbellExecutionHandler.class)
-class GoogleHomeDoorbellExecutionHandlerTest extends BaseTest {
+class GoogleHomeDoorbellExecutionHandlerTest implements JUnit5ValidationFileAssertionsWithJsonFormatting {
 
     @MockBean
     private DoorbellBuzzerStateService doorbellBuzzerStateService;

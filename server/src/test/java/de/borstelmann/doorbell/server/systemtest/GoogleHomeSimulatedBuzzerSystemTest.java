@@ -143,7 +143,7 @@ public class GoogleHomeSimulatedBuzzerSystemTest extends AbstractSimulatedBuzzer
 
     @NotNull
     @Override
-    protected ObjectMapper getObjectMapper() {
+    public ObjectMapper getObjectMapper() {
         return objectMapper.copy().configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
     }
 

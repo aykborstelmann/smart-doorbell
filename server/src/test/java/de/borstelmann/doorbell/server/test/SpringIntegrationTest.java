@@ -1,7 +1,6 @@
 package de.borstelmann.doorbell.server.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.services.homegraph.v1.HomeGraphService;
 import de.borstelmann.doorbell.server.domain.model.DoorbellDevice;
 import de.borstelmann.doorbell.server.domain.model.User;
 import de.borstelmann.doorbell.server.domain.repository.DoorbellDeviceRepository;
@@ -9,18 +8,13 @@ import de.borstelmann.doorbell.server.domain.repository.UserRepository;
 import de.cronn.testutils.h2.H2Util;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
-
-import java.io.IOException;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Import(H2Util.class)
-public abstract class SpringIntegrationTest extends BaseTest {
+public abstract class SpringIntegrationTest implements JUnit5ValidationFileAssertionsWithJsonFormatting {
 
     public static final String SAMPLE_OAUTH_ID = "oauthId";
 
@@ -82,7 +76,7 @@ public abstract class SpringIntegrationTest extends BaseTest {
 
     @NotNull
     @Override
-    protected ObjectMapper getObjectMapper() {
+    public ObjectMapper getObjectMapper() {
         return objectMapper;
     }
 }

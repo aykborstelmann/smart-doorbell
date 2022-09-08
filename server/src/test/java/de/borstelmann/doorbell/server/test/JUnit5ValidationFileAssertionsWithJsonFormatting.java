@@ -9,25 +9,24 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.UnsupportedEncodingException;
 
-public abstract class BaseTest implements JUnit5ValidationFileAssertions {
-
-    protected void assertWithFormattedJsonFile(String responseBody) {
+public interface JUnit5ValidationFileAssertionsWithJsonFormatting extends JUnit5ValidationFileAssertions {
+    default void assertWithFormattedJsonFile(String responseBody) {
         assertWithJsonFile(formatJsonString(responseBody));
     }
 
-    public void assertWithFormattedJsonFileWithSuffix(String responseBody, ValidationNormalizer validationNormalizer, String suffix) {
+    default void assertWithFormattedJsonFileWithSuffix(String responseBody, ValidationNormalizer validationNormalizer, String suffix) {
         assertWithJsonFileWithSuffix(formatJsonString(responseBody), validationNormalizer, suffix);
     }
 
-    protected void assertWithFormattedJsonFile(Object object) {
+    default void assertWithFormattedJsonFile(Object object) {
         assertWithJsonFile(formatJson(object));
     }
 
-    protected void assertWithFormattedJsonFile(MvcResult result) throws UnsupportedEncodingException {
-        this.assertWithFormattedJsonFile(result.getResponse().getContentAsString());
+    default void assertWithFormattedJsonFile(MvcResult result) throws UnsupportedEncodingException {
+        assertWithFormattedJsonFile(result.getResponse().getContentAsString());
     }
 
-    protected String formatJson(Object object) {
+    private String formatJson(Object object) {
         try {
             return getObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(object);
         } catch (JsonProcessingException e) {
@@ -35,7 +34,7 @@ public abstract class BaseTest implements JUnit5ValidationFileAssertions {
         }
     }
 
-    protected String formatJsonString(String json) {
+    private String formatJsonString(String json) {
         if (json == null || json.isBlank()) {
             return json;
         }
@@ -49,7 +48,8 @@ public abstract class BaseTest implements JUnit5ValidationFileAssertions {
     }
 
     @NotNull
-    protected ObjectMapper getObjectMapper() {
+    default ObjectMapper getObjectMapper() {
         return new ObjectMapper();
     }
+
 }
