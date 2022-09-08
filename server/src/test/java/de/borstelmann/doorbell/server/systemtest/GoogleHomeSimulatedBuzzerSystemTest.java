@@ -163,7 +163,7 @@ public class GoogleHomeSimulatedBuzzerSystemTest extends AbstractSimulatedBuzzer
 
     @DynamicPropertySource
     static void registerGoogleHomeApiUrl(DynamicPropertyRegistry registry) {
-        registry.add("googleHomeApiurl", () -> mockGoogleHomeApi.url("/").toString());
+        registry.add("mockGoogleHomeGraphRootUrl", () -> mockGoogleHomeApi.url("/").toString());
     }
 
     @TestConfiguration
@@ -171,7 +171,7 @@ public class GoogleHomeSimulatedBuzzerSystemTest extends AbstractSimulatedBuzzer
 
         @Bean
         @Primary
-        public HomeGraphService mockHomeGraphService(@Value("${googleHomeApiurl}") String googleHomeGraphUrl) throws GeneralSecurityException, IOException {
+        public HomeGraphService mockHomeGraphService(@Value("${mockGoogleHomeGraphRootUrl}") String googleHomeGraphUrl) throws GeneralSecurityException, IOException {
             HomeGraphService.Builder builder = new HomeGraphService.Builder(
                     GoogleNetHttpTransport.newTrustedTransport(),
                     GsonFactory.getDefaultInstance(),
