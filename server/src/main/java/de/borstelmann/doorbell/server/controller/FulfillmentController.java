@@ -21,7 +21,7 @@ public class FulfillmentController {
     @CrossOrigin(origins = "*")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> fulfillment(@RequestBody String requestBody, @RequestHeader Map<?, ?> requestHeaders) throws ExecutionException, InterruptedException {
-        log.info("Got request {}", requestBody);
+        log.debug("Got request {}", requestBody);
         final String result = smartHomeApp.handleRequest(requestBody, requestHeaders).get();
 
         return ResponseEntity
