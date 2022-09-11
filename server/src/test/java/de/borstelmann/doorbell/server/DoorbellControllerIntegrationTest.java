@@ -28,7 +28,7 @@ public class DoorbellControllerIntegrationTest extends OAuthIntegrationTest {
 
     @Test
     void testCreateDoorbell() throws Exception {
-        User user = createSampleUser();
+        User user = createSampleUserWithGoogleHomeConnected();
 
         DoorbellRequest doorbellRequest = new DoorbellRequest().name("name");
         String body = objectMapper.writeValueAsString(doorbellRequest);
@@ -58,7 +58,7 @@ public class DoorbellControllerIntegrationTest extends OAuthIntegrationTest {
 
     @Test
     void testGetAllDoorbells() throws Exception {
-        User user = createSampleUser();
+        User user = createSampleUserWithGoogleHomeConnected();
         createSampleDoorbellDevice(user);
 
         assertIsOkay(RequestUtils.createGetAllDoorbellsRequest(user.getId(), obtainToken()));
@@ -71,7 +71,7 @@ public class DoorbellControllerIntegrationTest extends OAuthIntegrationTest {
 
     @Test
     void testGetDoorbell() throws Exception {
-        User user = createSampleUser();
+        User user = createSampleUserWithGoogleHomeConnected();
 
         DoorbellDevice doorbell = DoorbellDevice.builder()
                 .name("Doorbell")
@@ -93,7 +93,7 @@ public class DoorbellControllerIntegrationTest extends OAuthIntegrationTest {
 
     @Test
     void testDeleteDoorbell() throws Exception {
-        User user = createSampleUser();
+        User user = createSampleUserWithGoogleHomeConnected();
         DoorbellDevice doorbell = createSampleDoorbellDevice(user);
 
         assertNoContent(RequestUtils.createDeleteDoorbellRequest(doorbell.getId(), obtainToken()));

@@ -66,9 +66,10 @@ public abstract class SpringIntegrationTest implements JUnit5ValidationFileAsser
         return doorbell;
     }
 
-    protected User createSampleUser() {
+    protected User createSampleUserWithGoogleHomeConnected() {
         User user = User.builder()
                 .oAuthId(SAMPLE_OAUTH_ID)
+                .googleHomeConnected(true)
                 .build();
         userRepository.saveAndFlush(user);
         return user;

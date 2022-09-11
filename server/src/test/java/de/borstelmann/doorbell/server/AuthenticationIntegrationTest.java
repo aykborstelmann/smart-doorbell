@@ -1,5 +1,6 @@
 package de.borstelmann.doorbell.server;
 
+import de.borstelmann.doorbell.server.domain.model.User;
 import de.borstelmann.doorbell.server.test.RequestUtils;
 import de.borstelmann.doorbell.server.test.authentication.OAuthIntegrationTest;
 import org.assertj.core.api.Assertions;
@@ -66,6 +67,8 @@ public class AuthenticationIntegrationTest extends OAuthIntegrationTest {
                 .andExpect(MockMvcResultMatchers.status().is(not(HttpStatus.UNAUTHORIZED)));
 
         Assertions.assertThat(userRepository.findByOAuthId(oAuthId))
-                .isPresent();
+                .isPresent()
+                .get()
+                .returns(false, User::isGoogleHomeConnected);
     }
 }

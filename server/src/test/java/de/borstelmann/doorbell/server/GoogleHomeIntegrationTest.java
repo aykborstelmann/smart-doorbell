@@ -4,6 +4,7 @@ import de.borstelmann.doorbell.server.domain.model.DoorbellDevice;
 import de.borstelmann.doorbell.server.domain.model.User;
 import de.borstelmann.doorbell.server.services.DoorbellBuzzerStateService;
 import de.borstelmann.doorbell.server.test.authentication.OAuthIntegrationTest;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -15,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class GoogleHomeIntegrationTest extends OAuthIntegrationTest {
 
+    private User sampleUser;
     private String token;
     private DoorbellDevice sampleDoorbellDevice;
 
@@ -23,13 +25,16 @@ public class GoogleHomeIntegrationTest extends OAuthIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        User sampleUser = createSampleUser();
+        sampleUser = createSampleUserWithGoogleHomeConnected();
         sampleDoorbellDevice = createSampleDoorbellDevice(sampleUser);
         token = obtainToken();
     }
 
     @Test
     void testSync() throws Exception {
+        sampleUser.setGoogleHomeConnected(false);
+        userRepository.save(sampleUser);
+
         String fulfillmentRequest = """
                         {
                             "requestId": "ff36a3cc-ec34-11e6-b1a0-64510650abcf",
@@ -41,6 +46,11 @@ public class GoogleHomeIntegrationTest extends OAuthIntegrationTest {
 
 
         assertIsOkay(createFulfillmentRequest(fulfillmentRequest, token));
+
+        Assertions.assertThat(userRepository.findById(sampleUser.getId()))
+                .isPresent()
+                .get()
+                .returns(true, User::isGoogleHomeConnected);
     }
 
 

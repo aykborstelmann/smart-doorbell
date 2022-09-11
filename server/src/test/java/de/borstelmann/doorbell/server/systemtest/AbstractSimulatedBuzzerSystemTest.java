@@ -33,7 +33,7 @@ import static org.awaitility.Awaitility.await;
 public abstract class AbstractSimulatedBuzzerSystemTest extends OAuthIntegrationTest {
 
     @Autowired
-    private MockWebServer mockGoogleHomeApi;
+    protected MockWebServer mockGoogleHomeApi;
 
     @Autowired
     protected UnitTestClock clock;
@@ -50,7 +50,7 @@ public abstract class AbstractSimulatedBuzzerSystemTest extends OAuthIntegration
 
     @BeforeEach
     void setUp() throws ExecutionException, InterruptedException {
-        User sampleUser = createSampleUser();
+        User sampleUser = createSampleUserWithGoogleHomeConnected();
         sampleDoorbellDevice = createSampleDoorbellDevice(sampleUser);
         bearer = obtainToken();
 
@@ -101,7 +101,7 @@ public abstract class AbstractSimulatedBuzzerSystemTest extends OAuthIntegration
         assertGoogleHomeRequestIsSent("close");
     }
 
-    private void awaitAssertQueryResponse() {
+    protected void awaitAssertQueryResponse() {
         await().untilAsserted(this::assertQueryState);
     }
 

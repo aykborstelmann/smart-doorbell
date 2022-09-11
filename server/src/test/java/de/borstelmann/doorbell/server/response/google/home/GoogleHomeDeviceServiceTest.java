@@ -2,10 +2,8 @@ package de.borstelmann.doorbell.server.response.google.home;
 
 import com.google.actions.api.smarthome.ExecuteRequest;
 import com.google.actions.api.smarthome.ExecuteResponse;
-import com.google.api.client.googleapis.GoogleUtils;
 import com.google.api.services.homegraph.v1.HomeGraphService;
 import com.google.api.services.homegraph.v1.model.ReportStateAndNotificationRequest;
-import com.google.api.services.homegraph.v1.model.StateAndNotificationPayload;
 import de.borstelmann.doorbell.server.domain.model.DoorbellDevice;
 import de.borstelmann.doorbell.server.domain.model.User;
 import de.borstelmann.doorbell.server.domain.repository.DoorbellDeviceRepository;
@@ -14,6 +12,7 @@ import de.borstelmann.doorbell.server.error.BadRequestException;
 import de.borstelmann.doorbell.server.error.ForbiddenException;
 import de.borstelmann.doorbell.server.services.AuthenticationService;
 import de.borstelmann.doorbell.server.services.DoorbellService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -24,7 +23,6 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,14 +35,8 @@ class GoogleHomeDeviceServiceTest {
 
     private static final long USER_ID = 0L;
     private static final long DOORBELL_ID = 1L;
-    private static final DoorbellDevice SAMPLE_DOORBELL = DoorbellDevice.builder()
-            .id(DOORBELL_ID)
-            .name("Test")
-            .build();
-    private static final User SAMPLE_USER = User.builder()
-            .id(USER_ID)
-            .doorbellDevices(List.of(SAMPLE_DOORBELL))
-            .build();
+    private DoorbellDevice sampleDoorbell;
+    private User sampleUser;
 
     @MockBean
     private DoorbellDeviceRepository doorbellDeviceRepository;
@@ -64,18 +56,34 @@ class GoogleHomeDeviceServiceTest {
     @SpyBean
     private GoogleHomeDeviceService googleHomeDeviceService;
 
+    @BeforeEach
+    void setUp() {
+        sampleDoorbell = DoorbellDevice.builder()
+                .id(DOORBELL_ID)
+                .name("Test")
+                .build();
+
+        sampleUser = User.builder()
+                .id(USER_ID)
+                .doorbellDevices(List.of(sampleDoorbell))
+                .googleHomeConnected(true)
+                .build();
+
+        sampleDoorbell.setUser(sampleUser);
+    }
+
     @Test
     void testGetAllDevicesForUser() {
         withSampleUserLoggedIn();
 
-        doReturn(Optional.of(SAMPLE_USER)).when(userRepository).findById(USER_ID);
+        doReturn(Optional.of(sampleUser)).when(userRepository).findById(USER_ID);
 
         List<? extends GoogleHomeDoorbellDevice> allDevicesForUser = googleHomeDeviceService.getAllDevicesForUser();
         assertThat(allDevicesForUser)
                 .hasSize(1)
                 .hasOnlyElementsOfType(GoogleHomeDoorbellDevice.class)
                 .extracting(GoogleHomeDoorbellDevice::getId)
-                .containsExactly(String.valueOf(SAMPLE_DOORBELL.getId()));
+                .containsExactly(String.valueOf(sampleDoorbell.getId()));
         }
 
 
@@ -83,15 +91,14 @@ class GoogleHomeDeviceServiceTest {
     void testGetDevicesForUser() {
         withSampleUserLoggedIn();
 
-        SAMPLE_DOORBELL.setUser(SAMPLE_USER);
-        doReturn(List.of(SAMPLE_DOORBELL)).when(doorbellDeviceRepository).findAllById(List.of(SAMPLE_DOORBELL.getId()));
+        doReturn(List.of(sampleDoorbell)).when(doorbellDeviceRepository).findAllById(List.of(sampleDoorbell.getId()));
 
         List<? extends GoogleHomeDoorbellDevice> devicesForUser = googleHomeDeviceService.getDevicesForUser(List.of(DOORBELL_ID));
         assertThat(devicesForUser)
                 .hasSize(1)
                 .hasOnlyElementsOfType(GoogleHomeDoorbellDevice.class)
                 .extracting(GoogleHomeDoorbellDevice::getId)
-                .containsExactly(String.valueOf(SAMPLE_DOORBELL.getId()));
+                .containsExactly(String.valueOf(sampleDoorbell.getId()));
     }
 
     @Test
@@ -99,8 +106,8 @@ class GoogleHomeDeviceServiceTest {
         withSampleUserLoggedIn();
 
         User differentUser = User.builder().id(1L).build();
-        SAMPLE_DOORBELL.setUser(differentUser);
-        doReturn(List.of(SAMPLE_DOORBELL)).when(doorbellDeviceRepository).findAllById(List.of(SAMPLE_DOORBELL.getId()));
+        sampleDoorbell.setUser(differentUser);
+        doReturn(List.of(sampleDoorbell)).when(doorbellDeviceRepository).findAllById(List.of(sampleDoorbell.getId()));
 
         List<Long> doorbellIds = List.of(DOORBELL_ID);
         ForbiddenException forbiddenException = catchThrowableOfType(
@@ -114,11 +121,11 @@ class GoogleHomeDeviceServiceTest {
     void testGetDevice() {
         withSampleUserLoggedIn();
 
-        doReturn(Optional.of(SAMPLE_DOORBELL)).when(doorbellDeviceRepository).findById(DOORBELL_ID);
+        doReturn(Optional.of(sampleDoorbell)).when(doorbellDeviceRepository).findById(DOORBELL_ID);
 
         GoogleHomeDoorbellDevice device = googleHomeDeviceService.getDevice(DOORBELL_ID);
         assertThat(device).isInstanceOf(GoogleHomeDoorbellDevice.class);
-        assertThat(device.getId()).isEqualTo(String.valueOf(SAMPLE_DOORBELL.getId()));
+        assertThat(device.getId()).isEqualTo(String.valueOf(sampleDoorbell.getId()));
     }
 
     @Test
@@ -235,8 +242,8 @@ class GoogleHomeDeviceServiceTest {
         command.setExecution(new ExecuteRequest.Inputs.Payload.Commands.Execution[]{execution});
 
         ExecuteRequest.Inputs.Payload.Commands[] commands = new ExecuteRequest.Inputs.Payload.Commands[]{command};
-        doReturn(List.of(SAMPLE_DOORBELL)).when(doorbellDeviceRepository).findAllById(List.of(0L));
-        SAMPLE_DOORBELL.setUser(User.builder().id(2L).build());
+        doReturn(List.of(sampleDoorbell)).when(doorbellDeviceRepository).findAllById(List.of(0L));
+        sampleDoorbell.setUser(User.builder().id(2L).build());
 
         List<ExecuteResponse.Payload.Commands> response = googleHomeDeviceService.execute(commands);
         assertThat(response)
@@ -259,14 +266,14 @@ class GoogleHomeDeviceServiceTest {
         command.setExecution(new ExecuteRequest.Inputs.Payload.Commands.Execution[]{execution});
 
         ExecuteRequest.Inputs.Payload.Commands[] commands = new ExecuteRequest.Inputs.Payload.Commands[]{command};
-        doReturn(List.of(SAMPLE_DOORBELL)).when(doorbellDeviceRepository).findAllById(List.of(SAMPLE_DOORBELL.getId()));
+        doReturn(List.of(sampleDoorbell)).when(doorbellDeviceRepository).findAllById(List.of(sampleDoorbell.getId()));
 
         assertThatThrownBy(() -> googleHomeDeviceService.execute(commands)).isInstanceOf(BadRequestException.class);
         verify(googleHomeDoorbellExecutionHandler, never()).execute(any(), any());
     }
 
     @Test
-    void testReportDeviceState() throws IOException {
+    void testReportDeviceStateIfNessary_googleHomeEnabled() throws IOException {
         HomeGraphService homeGraphService = mock(HomeGraphService.class);
         HomeGraphService.Devices devices = mock(HomeGraphService.Devices.class);
         HomeGraphService.Devices.ReportStateAndNotification reportStateAndNotification = mock(HomeGraphService.Devices.ReportStateAndNotification.class);
@@ -276,18 +283,17 @@ class GoogleHomeDeviceServiceTest {
         ArgumentCaptor<ReportStateAndNotificationRequest> captor = ArgumentCaptor.forClass(ReportStateAndNotificationRequest.class);
         googleHomeDeviceService.setHomeGraphService(homeGraphService);
 
-        SAMPLE_DOORBELL.setUser(SAMPLE_USER);
-        doReturn(Optional.of(SAMPLE_DOORBELL)).when(doorbellDeviceRepository).findById(SAMPLE_DOORBELL.getId());
+        doReturn(Optional.of(sampleDoorbell)).when(doorbellDeviceRepository).findById(sampleDoorbell.getId());
 
-        googleHomeDeviceService.reportDeviceState(SAMPLE_DOORBELL.getId());
+        googleHomeDeviceService.reportDeviceStateIfNecessary(sampleDoorbell.getId());
         verify(devices).reportStateAndNotification(captor.capture());
 
         ReportStateAndNotificationRequest request = captor.getValue();
         assertThat(request.getRequestId()).isNotBlank();
-        assertThat(request.getAgentUserId()).isEqualTo(SAMPLE_USER.getId().toString());
+        assertThat(request.getAgentUserId()).isEqualTo(sampleUser.getId().toString());
 
         assertThat(request.getPayload().getDevices().getStates())
-                .extractingByKey(SAMPLE_DOORBELL.getId().toString())
+                .extractingByKey(sampleDoorbell.getId().toString())
                 .asInstanceOf(MAP)
                 .contains(
                         entry(GoogleHomePayloadAttributes.IS_JAMMED, false),
@@ -297,12 +303,30 @@ class GoogleHomeDeviceServiceTest {
 
     }
 
+    @Test
+    void testReportDeviceStateIfNessary_googleHomeDisabled() throws IOException {
+        HomeGraphService homeGraphService = mock(HomeGraphService.class);
+        HomeGraphService.Devices devices = mock(HomeGraphService.Devices.class);
+        HomeGraphService.Devices.ReportStateAndNotification reportStateAndNotification = mock(HomeGraphService.Devices.ReportStateAndNotification.class);
+
+        doReturn(devices).when(homeGraphService).devices();
+        doReturn(reportStateAndNotification).when(devices).reportStateAndNotification(any());
+        ArgumentCaptor<ReportStateAndNotificationRequest> captor = ArgumentCaptor.forClass(ReportStateAndNotificationRequest.class);
+        googleHomeDeviceService.setHomeGraphService(homeGraphService);
+
+        sampleUser.setGoogleHomeConnected(false);
+        doReturn(Optional.of(sampleDoorbell)).when(doorbellDeviceRepository).findById(sampleDoorbell.getId());
+
+        googleHomeDeviceService.reportDeviceStateIfNecessary(sampleDoorbell.getId());
+        verify(devices, never()).reportStateAndNotification(any());
+    }
+
     private void withNoUserLoggedIn() {
         doThrow(new BadRequestException("Current session does not have a user")).when(authenticationService).getCurrentUserOrThrow();
     }
 
 
     private void withSampleUserLoggedIn() {
-        doReturn(SAMPLE_USER).when(authenticationService).getCurrentUserOrThrow();
+        doReturn(sampleUser).when(authenticationService).getCurrentUserOrThrow();
     }
 }

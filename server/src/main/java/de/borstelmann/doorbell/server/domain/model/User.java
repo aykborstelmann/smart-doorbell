@@ -23,4 +23,6 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<DoorbellDevice> doorbellDevices;
 
+    private boolean googleHomeConnected = false;
+
 }

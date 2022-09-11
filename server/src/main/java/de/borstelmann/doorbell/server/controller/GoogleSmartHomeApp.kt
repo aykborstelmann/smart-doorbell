@@ -3,19 +3,22 @@ package de.borstelmann.doorbell.server.controller
 import com.google.actions.api.smarthome.*
 import de.borstelmann.doorbell.server.response.google.home.GoogleHomeDeviceService
 import de.borstelmann.doorbell.server.services.AuthenticationService
+import de.borstelmann.doorbell.server.services.UserService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class GoogleSmartHomeApp(
         private val googleHomeDeviceService: GoogleHomeDeviceService,
-        private val authenticationService: AuthenticationService
+        private val authenticationService: AuthenticationService,
+        private val userService: UserService
 ) : SmartHomeApp() {
 
     private val log = LoggerFactory.getLogger(this.javaClass)
 
     override fun onDisconnect(request: DisconnectRequest, headers: Map<*, *>?) {
-        TODO("Not yet implemented")
+        val user = authenticationService.currentUserOrThrow
+        userService.disableGoogleHomeForUser(user.id)
     }
 
     override fun onExecute(request: ExecuteRequest, headers: Map<*, *>?): ExecuteResponse {
@@ -56,6 +59,8 @@ class GoogleSmartHomeApp(
         syncResponse.payload = SyncResponse.Payload()
 
         val user = authenticationService.getCurrentUserOrThrow()
+
+        userService.enableGoogleHomeForUser(user.id)
 
         syncResponse.payload.agentUserId = user.id.toString()
         syncResponse.payload.devices = googleHomeDeviceService.getAllDevicesForUser()

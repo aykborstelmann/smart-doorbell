@@ -14,14 +14,14 @@ class UserControllerIntegrationTest extends OAuthIntegrationTest {
 
     @Test
     void testGetAllUsers() throws Exception {
-        createSampleUser();
+        createSampleUserWithGoogleHomeConnected();
 
         assertIsOkay(RequestUtils.createGetAllUsersRequest(obtainToken()));
     }
 
     @Test
     void testGetUserById() throws Exception {
-        User user = createSampleUser();
+        User user = createSampleUserWithGoogleHomeConnected();
 
         assertIsOkay(RequestUtils.createGetUserByIdRequest(user.getId(), obtainToken()));
     }
@@ -33,7 +33,7 @@ class UserControllerIntegrationTest extends OAuthIntegrationTest {
 
     @Test
     void testDeleteUserById() throws Exception {
-        User user = createSampleUser();
+        User user = createSampleUserWithGoogleHomeConnected();
 
         assertNoContent(RequestUtils.createDeleteUserRequest(user.getId(), obtainToken()));
     }

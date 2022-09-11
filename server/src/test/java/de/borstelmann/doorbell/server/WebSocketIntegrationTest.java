@@ -8,7 +8,6 @@ import de.borstelmann.doorbell.server.dto.StateMessage;
 import de.borstelmann.doorbell.server.test.authentication.OAuthIntegrationTest;
 import de.borstelmann.doorbell.server.test.websocket.StompConfig;
 import de.borstelmann.doorbell.server.test.websocket.WebSocketClientUtil;
-import de.cronn.testutils.h2.H2Util;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +42,7 @@ public class WebSocketIntegrationTest extends OAuthIntegrationTest {
 
     @BeforeEach
     void setUp() throws InterruptedException, ExecutionException {
-        User sampleUser = createSampleUser();
+        User sampleUser = createSampleUserWithGoogleHomeConnected();
         sampleDoorbellDevice = createSampleDoorbellDevice(sampleUser);
         stompSession = getStompSessionWithLogin(String.valueOf(sampleDoorbellDevice.getId()));
     }

@@ -13,9 +13,9 @@ import de.borstelmann.doorbell.server.domain.repository.DoorbellDeviceRepository
 import de.borstelmann.doorbell.server.error.ForbiddenException;
 import de.borstelmann.doorbell.server.services.AuthenticationService;
 import de.borstelmann.doorbell.server.services.DoorbellService;
+import de.borstelmann.doorbell.server.services.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -102,7 +102,8 @@ public class GoogleHomeDeviceService {
                 .toList();
     }
 
-    public void reportDeviceState(long deviceId) {
+    public void reportDeviceStateIfNecessary(long deviceId) {
+        if (!isGoogleHomeConnected(deviceId)) return;
         var device = getDevice(deviceId);
 
         var devicePayload = new ReportStateAndNotificationDevice()
@@ -124,6 +125,11 @@ public class GoogleHomeDeviceService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private boolean isGoogleHomeConnected(long deviceId) {
+        DoorbellDevice doorbell = doorbellService.getDoorbell(deviceId);
+        return doorbell.getUser().isGoogleHomeConnected();
     }
 
     @Autowired(required = false)
