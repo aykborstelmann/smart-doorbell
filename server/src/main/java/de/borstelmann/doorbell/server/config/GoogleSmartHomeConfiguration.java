@@ -18,14 +18,16 @@ import java.util.List;
 @Configuration
 public class GoogleSmartHomeConfiguration {
 
+    public static final List<String> ACCESSIBLE_GOOGLE_APIS = List.of("https://www.googleapis.com/auth/homegraph");
     public static final String KEY_PATH = "classpath:smart-doorbell.json";
+    public static final String APPLICATION_NAME = "SmartDoorbell/1.0";
 
     @Bean
     @ConditionalOnResource(resources = KEY_PATH)
     public HomeGraphService homeGraphService(@Value(KEY_PATH) Resource resourceFile) throws GeneralSecurityException, IOException {
         GoogleCredentials credentials = GoogleCredentials
                 .fromStream(resourceFile.getInputStream())
-                .createScoped(List.of("https://www.googleapis.com/auth/homegraph"));
+                .createScoped(ACCESSIBLE_GOOGLE_APIS);
 
         HomeGraphService.Builder builder = new HomeGraphService.Builder(
                 GoogleNetHttpTransport.newTrustedTransport(),
@@ -34,7 +36,7 @@ public class GoogleSmartHomeConfiguration {
         );
 
         return builder
-                .setApplicationName("HomeGraphExample/1.0")
+                .setApplicationName(APPLICATION_NAME)
                 .build();
     }
 
