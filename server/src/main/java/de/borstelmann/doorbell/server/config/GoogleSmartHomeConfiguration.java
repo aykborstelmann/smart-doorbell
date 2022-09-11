@@ -6,7 +6,6 @@ import com.google.api.services.homegraph.v1.HomeGraphService;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnResource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
@@ -23,11 +22,8 @@ public class GoogleSmartHomeConfiguration {
     public static final String APPLICATION_NAME = "SmartDoorbell/1.0";
 
     @Bean
-    @ConditionalOnResource(resources = KEY_PATH)
     public HomeGraphService homeGraphService(@Value(KEY_PATH) Resource resourceFile) throws GeneralSecurityException, IOException {
-        GoogleCredentials credentials = GoogleCredentials
-                .fromStream(resourceFile.getInputStream())
-                .createScoped(ACCESSIBLE_GOOGLE_APIS);
+        GoogleCredentials credentials = getGoogleCredentials(resourceFile);
 
         HomeGraphService.Builder builder = new HomeGraphService.Builder(
                 GoogleNetHttpTransport.newTrustedTransport(),
@@ -38,6 +34,19 @@ public class GoogleSmartHomeConfiguration {
         return builder
                 .setApplicationName(APPLICATION_NAME)
                 .build();
+    }
+
+    private static GoogleCredentials getGoogleCredentials(Resource resourceFile) throws IOException {
+        if (resourceFile.exists()) {
+            return GoogleCredentials
+                    .fromStream(resourceFile.getInputStream())
+                    .createScoped(ACCESSIBLE_GOOGLE_APIS);
+        }
+
+        return GoogleCredentials
+                .newBuilder()
+                .build();
+
     }
 
 }
