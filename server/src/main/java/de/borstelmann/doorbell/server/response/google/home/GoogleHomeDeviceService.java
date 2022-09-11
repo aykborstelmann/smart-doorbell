@@ -32,7 +32,7 @@ public class GoogleHomeDeviceService {
     private final DoorbellDeviceRepository doorbellDeviceRepository;
     private final GoogleHomeDoorbellExecutionHandler executionHandler;
     private final AuthenticationService authenticationService;
-    private HomeGraphService homeGraphService;
+    private final HomeGraphService homeGraphService;
 
     public List<GoogleHomeDoorbellDevice> getAllDevicesForUser() {
         User user = authenticationService.getCurrentUserOrThrow();
@@ -132,8 +132,4 @@ public class GoogleHomeDeviceService {
         return doorbell.getUser().isGoogleHomeConnected();
     }
 
-    @Autowired(required = false)
-    public void setHomeGraphService(HomeGraphService homeGraphService) {
-        this.homeGraphService = homeGraphService;
-    }
 }

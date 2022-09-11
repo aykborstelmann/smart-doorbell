@@ -274,14 +274,12 @@ class GoogleHomeDeviceServiceTest {
 
     @Test
     void testReportDeviceStateIfNessary_googleHomeEnabled() throws IOException {
-        HomeGraphService homeGraphService = mock(HomeGraphService.class);
         HomeGraphService.Devices devices = mock(HomeGraphService.Devices.class);
         HomeGraphService.Devices.ReportStateAndNotification reportStateAndNotification = mock(HomeGraphService.Devices.ReportStateAndNotification.class);
 
         doReturn(devices).when(homeGraphService).devices();
         doReturn(reportStateAndNotification).when(devices).reportStateAndNotification(any());
         ArgumentCaptor<ReportStateAndNotificationRequest> captor = ArgumentCaptor.forClass(ReportStateAndNotificationRequest.class);
-        googleHomeDeviceService.setHomeGraphService(homeGraphService);
 
         doReturn(Optional.of(sampleDoorbell)).when(doorbellDeviceRepository).findById(sampleDoorbell.getId());
 
@@ -305,14 +303,11 @@ class GoogleHomeDeviceServiceTest {
 
     @Test
     void testReportDeviceStateIfNessary_googleHomeDisabled() throws IOException {
-        HomeGraphService homeGraphService = mock(HomeGraphService.class);
         HomeGraphService.Devices devices = mock(HomeGraphService.Devices.class);
         HomeGraphService.Devices.ReportStateAndNotification reportStateAndNotification = mock(HomeGraphService.Devices.ReportStateAndNotification.class);
 
         doReturn(devices).when(homeGraphService).devices();
         doReturn(reportStateAndNotification).when(devices).reportStateAndNotification(any());
-        ArgumentCaptor<ReportStateAndNotificationRequest> captor = ArgumentCaptor.forClass(ReportStateAndNotificationRequest.class);
-        googleHomeDeviceService.setHomeGraphService(homeGraphService);
 
         sampleUser.setGoogleHomeConnected(false);
         doReturn(Optional.of(sampleDoorbell)).when(doorbellDeviceRepository).findById(sampleDoorbell.getId());
