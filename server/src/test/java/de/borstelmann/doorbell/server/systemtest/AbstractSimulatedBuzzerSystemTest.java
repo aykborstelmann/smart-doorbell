@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,8 +55,22 @@ public abstract class AbstractSimulatedBuzzerSystemTest extends OAuthIntegration
         sampleDoorbellDevice = createSampleDoorbellDevice(sampleUser);
         bearer = obtainToken();
 
-        doorbellBuzzerSimulator = new DoorbellBuzzerSimulator(stompClient, webSocketUrl(), clock);
+        doorbellBuzzerSimulator = createDoorbellBuzzerSimulator();
         doorbellBuzzerSimulator.connect(String.valueOf(sampleDoorbellDevice.getId()));
+
+        extractAllRequests();
+    }
+
+    protected DoorbellBuzzerSimulator createDoorbellBuzzerSimulator() {
+        return new DoorbellBuzzerSimulator(stompClient, webSocketUrl(), clock);
+    }
+
+    private void extractAllRequests() throws InterruptedException {
+        while (true)  {
+            if (getRecordedRequest() == null) {
+                break;
+            }
+        }
     }
 
     @AfterEach
@@ -112,7 +127,7 @@ public abstract class AbstractSimulatedBuzzerSystemTest extends OAuthIntegration
     protected abstract void assertQueryState() throws Exception;
 
     public void assertGoogleHomeRequestIsSent(String suffix) throws InterruptedException, IOException {
-        String content = readRequestBody(mockGoogleHomeApi.takeRequest());
+        String content = readRequestBody(getRecordedRequest());
         assertWithFormattedJsonFileWithSuffix(content, new IdNormalizer("\"requestId\" : \"(.*)\""), "report-state-%s".formatted(suffix));
     }
 
@@ -133,6 +148,10 @@ public abstract class AbstractSimulatedBuzzerSystemTest extends OAuthIntegration
     @Override
     public ObjectMapper getObjectMapper() {
         return objectMapper.copy().configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+    }
+
+    private RecordedRequest getRecordedRequest() throws InterruptedException {
+        return mockGoogleHomeApi.takeRequest(100, TimeUnit.MILLISECONDS);
     }
 
 }

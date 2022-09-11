@@ -25,6 +25,7 @@ public class DoorbellStateChangeService {
                 .ifPresent(doorbell -> {
                     doorbell.setIsConnected(isConnected);
                     doorbellDeviceRepository.save(doorbell);
+                    googleHomeDeviceService.reportDeviceStateIfNecessary(doorbell.getId());
                 });
     }
 }

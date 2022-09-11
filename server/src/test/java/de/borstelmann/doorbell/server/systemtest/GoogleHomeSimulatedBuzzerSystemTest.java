@@ -1,6 +1,10 @@
 package de.borstelmann.doorbell.server.systemtest;
 
 import de.borstelmann.doorbell.server.test.RequestUtils;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 public class GoogleHomeSimulatedBuzzerSystemTest extends AbstractSimulatedBuzzerSystemTest {
 
@@ -97,6 +101,15 @@ public class GoogleHomeSimulatedBuzzerSystemTest extends AbstractSimulatedBuzzer
                 """.formatted(sampleDoorbellDevice.getId());
 
         mockMvc.perform(RequestUtils.createFulfillmentRequest(requestBody, bearer));
+    }
+
+    @Test
+    void testDisconnectConnectInformsGoogleHome() throws ExecutionException, InterruptedException, IOException {
+        doorbellBuzzerSimulator.reset();
+        assertGoogleHomeRequestIsSent("disconnect");
+
+        doorbellBuzzerSimulator.connect(String.valueOf(sampleDoorbellDevice.getId()));
+        assertGoogleHomeRequestIsSent("connect");
     }
 
 }
