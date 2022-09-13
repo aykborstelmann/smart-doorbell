@@ -165,7 +165,7 @@ public class GoogleHomeIntegrationTest extends OAuthIntegrationTest {
                       }
                     }
                   ],
-                  "requestId": "4982066045573259553"
+                  "requestId": "ff36a3cc-ec34-11e6-b1a0-64510650abcf"
                 }
                 """.formatted(sampleDoorbellDevice.getId());
 

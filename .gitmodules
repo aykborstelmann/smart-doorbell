@@ -1,0 +1,3 @@
+[submodule "server/src/main/resources/google-home-schema"]
+	path = server/src/main/resources/google-home-schema
+	url = git@github.com:actions-on-google/smart-home-schema.git

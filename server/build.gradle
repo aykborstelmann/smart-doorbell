@@ -11,6 +11,7 @@ plugins {
     id 'java'
     id 'idea'
     id 'org.springframework.boot' version '2.6.4'
+    id "org.jsonschema2dataclass" version '4.3.1'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'org.openapi.generator' version '5.4.0'
     id 'org.jetbrains.kotlin.jvm' version '1.6.20'
@@ -70,7 +71,7 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-final String OUTPUT_DIR = "$buildDir/generated".toString()
+final String OUTPUT_DIR = "$buildDir/generated/main".toString()
 
 sourceSets {
     main {
@@ -106,3 +107,16 @@ task codeGen(type: GenerateTask) {
 }
 
 compileJava.dependsOn(codeGen)
+
+jsonSchema2Pojo {
+    targetPackage = 'de.borstelmann.doorbell.server.googlehome.model' // specify package for your needs
+    source.setFrom files("${projectDir}/src/main/resources/google-home-schema/")
+    fileFilter = new FileFilter() {
+        @Override
+        boolean accept(File file) {
+            return file.isDirectory() || file.toString().endsWith(".json")
+        }
+    }
+    targetDirectoryPrefix = file("$buildDir/generated")
+    useTitleAsClassname = true
+}
