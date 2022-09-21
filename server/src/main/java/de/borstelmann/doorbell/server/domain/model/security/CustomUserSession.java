@@ -2,14 +2,11 @@ package de.borstelmann.doorbell.server.domain.model.security;
 
 import de.borstelmann.doorbell.server.domain.model.User;
 import lombok.Getter;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.Collection;
-import java.util.Optional;
 
 @Getter
 public class CustomUserSession extends AbstractAuthenticationToken {
@@ -33,17 +30,4 @@ public class CustomUserSession extends AbstractAuthenticationToken {
         return this.user;
     }
 
-    @Nullable
-    private static CustomUserSession getCurrentUserSession() {
-        return (CustomUserSession) Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
-                .filter(authentication -> authentication instanceof CustomUserSession)
-                .orElse(null);
-    }
-
-    @Nullable
-    public static User getCurrentUser() {
-        return Optional.ofNullable(getCurrentUserSession())
-                .map(CustomUserSession::getUser)
-                .orElse(null);
-    }
 }

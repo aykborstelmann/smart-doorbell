@@ -102,4 +102,28 @@ class UserServiceTest {
                 .extracting(User::getOAuthId)
                 .isEqualTo(oAuthId);
     }
+
+    @Test
+    void testEnableGoogleHomeForUser() {
+        Long userId = 1L;
+        User user = new User();
+        doReturn(Optional.of(user)).when(userRepository).findById(userId);
+
+        userService.enableGoogleHomeForUser(userId);
+
+        assertThat(user.isGoogleHomeConnected()).isTrue();
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void testDisableGoogleHomeForUser() {
+        Long userId = 1L;
+        User user = new User();
+        doReturn(Optional.of(user)).when(userRepository).findById(userId);
+
+        userService.disableGoogleHomeForUser(userId);
+
+        assertThat(user.isGoogleHomeConnected()).isFalse();
+        verify(userRepository).save(user);
+    }
 }

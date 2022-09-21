@@ -40,4 +40,16 @@ public class UserService {
     private User createUserWithOAuthId(String oAuthId) {
         return userRepository.save(User.builder().oAuthId(oAuthId).build());
     }
+
+    public void enableGoogleHomeForUser(Long id) {
+        User user = getUserById(id);
+        user.setGoogleHomeConnected(true);
+        userRepository.save(user);
+    }
+
+    public void disableGoogleHomeForUser(Long id) {
+        User user = getUserById(id);
+        user.setGoogleHomeConnected(false);
+        userRepository.save(user);
+    }
 }

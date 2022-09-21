@@ -1,0 +1,15 @@
+{
+  "agentUserId" : "1",
+  "payload" : {
+    "devices" : {
+      "states" : {
+        "1" : {
+          "isJammed" : false,
+          "isLocked" : true,
+          "online" : false
+        }
+      }
+    }
+  },
+  "requestId" : "1"
+}

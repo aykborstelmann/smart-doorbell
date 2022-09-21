@@ -1,0 +1,7 @@
+{
+  "id" : 1,
+  "is_connected" : true,
+  "is_opened" : false,
+  "last_notified" : null,
+  "name" : "Doorbell"
+}

@@ -1,4 +1,4 @@
-package de.borstelmann.doorbell.server.controller;
+package de.borstelmann.doorbell.server.test;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpHeaders;
@@ -17,6 +17,16 @@ public class RequestUtils {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody);
     }
+
+
+    @NotNull
+    public static MockHttpServletRequestBuilder createFulfillmentRequest(String requestBody, String bearer) {
+        return post("/api/v1/fulfillment")
+                .header(HttpHeaders.AUTHORIZATION, getBearer(bearer))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody);
+    }
+
 
     @NotNull
     public static RequestBuilder createGetAllUsersRequest(String bearer) {

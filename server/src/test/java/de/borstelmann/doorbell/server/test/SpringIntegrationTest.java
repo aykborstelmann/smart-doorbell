@@ -5,22 +5,24 @@ import de.borstelmann.doorbell.server.domain.model.DoorbellDevice;
 import de.borstelmann.doorbell.server.domain.model.User;
 import de.borstelmann.doorbell.server.domain.repository.DoorbellDeviceRepository;
 import de.borstelmann.doorbell.server.domain.repository.UserRepository;
-import de.cronn.assertions.validationfile.normalization.IdNormalizer;
-import de.cronn.assertions.validationfile.normalization.IncrementingIdProvider;
-import de.cronn.assertions.validationfile.normalization.ValidationNormalizer;
+import de.cronn.testutils.h2.H2Util;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-public abstract class SpringIntegrationTest extends BaseTest {
+@Import(H2Util.class)
+public abstract class SpringIntegrationTest implements JUnit5ValidationFileAssertionsWithJsonFormatting {
 
     public static final String SAMPLE_OAUTH_ID = "oauthId";
 
@@ -33,46 +35,15 @@ public abstract class SpringIntegrationTest extends BaseTest {
     @Autowired
     protected DoorbellDeviceRepository doorbellDeviceRepository;
 
-    @Override
-    public void assertWithFormattedJsonFile(String responseBody) {
-        String formattedJson = formatJson(responseBody);
-        super.assertWithJsonFile(formattedJson, getJsonIdNormalizer());
-    }
-
-    @Override
-    public void assertWithFormattedJsonFile(String responseBody, ValidationNormalizer validationNormalizer) {
-        String formattedJson = formatJson(responseBody);
-        super.assertWithFormattedJsonFile(getJsonIdNormalizer().normalize(formattedJson), validationNormalizer);
-    }
-
-    @NotNull
-    @Override
-    protected ObjectMapper getObjectMapper() {
-        return objectMapper;
-    }
-
-    private ValidationNormalizer getJsonIdNormalizer() {
-        return new IdNormalizer(new IncrementingIdProvider(), "", false, "\"id\"\\s?:\\s?(\\d+)");
-    }
-
-    public IdNormalizer getErrorMessageIdNormalizer() {
-        return new IdNormalizer(new IncrementingIdProvider(), "", false, "ID\\s(\\d+)");
+    @AfterEach
+    protected void resetDatabase(@Autowired H2Util h2Util) {
+        h2Util.resetDatabase();
     }
 
     protected ResultActions assertIsOkay(RequestBuilder createDoorbellBuzzerRequest) throws Exception {
-        return assertIsOkay(createDoorbellBuzzerRequest, null);
-    }
-
-    protected ResultActions assertIsOkay(RequestBuilder createDoorbellBuzzerRequest, ValidationNormalizer validationNormalizer) throws Exception {
         return mockMvc.perform(createDoorbellBuzzerRequest)
                 .andExpect(status().isOk())
-                .andExpect(result -> assertWithFormattedJsonFile(result, validationNormalizer));
-    }
-
-    protected void assertBadRequest(RequestBuilder request, ValidationNormalizer validationNormalizer) throws Exception {
-        mockMvc.perform(request)
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> assertWithFormattedJsonFile(result, validationNormalizer));
+                .andExpect(this::assertWithFormattedJsonFile);
     }
 
     protected void assertNotFound(RequestBuilder request) throws Exception {
@@ -81,10 +52,9 @@ public abstract class SpringIntegrationTest extends BaseTest {
                 .andExpect(this::assertWithFormattedJsonFile);
     }
 
-    protected void assertNotFound(RequestBuilder request, ValidationNormalizer validationNormalizer) throws Exception {
-        mockMvc.perform(request)
-                .andExpect(status().isNotFound())
-                .andExpect(result -> assertWithFormattedJsonFile(result, validationNormalizer));
+    protected void assertNoContent(RequestBuilder deleteUserRequest) throws Exception {
+        mockMvc.perform(deleteUserRequest)
+                .andExpect(status().isNoContent());
     }
 
     protected DoorbellDevice createSampleDoorbellDevice(User user) {
@@ -96,16 +66,18 @@ public abstract class SpringIntegrationTest extends BaseTest {
         return doorbell;
     }
 
-    protected User createSampleUser() {
+    protected User createSampleUserWithGoogleHomeConnected() {
         User user = User.builder()
                 .oAuthId(SAMPLE_OAUTH_ID)
+                .googleHomeConnected(true)
                 .build();
         userRepository.saveAndFlush(user);
         return user;
     }
 
-    protected void assertNoContent(RequestBuilder deleteUserRequest) throws Exception {
-        mockMvc.perform(deleteUserRequest)
-                .andExpect(status().isNoContent());
+    @NotNull
+    @Override
+    public ObjectMapper getObjectMapper() {
+        return objectMapper;
     }
 }

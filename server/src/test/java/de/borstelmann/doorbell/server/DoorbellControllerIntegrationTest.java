@@ -1,6 +1,6 @@
 package de.borstelmann.doorbell.server;
 
-import de.borstelmann.doorbell.server.controller.RequestUtils;
+import de.borstelmann.doorbell.server.test.RequestUtils;
 import de.borstelmann.doorbell.server.domain.model.DoorbellDevice;
 import de.borstelmann.doorbell.server.domain.model.User;
 import de.borstelmann.doorbell.server.domain.repository.DoorbellDeviceRepository;
@@ -8,7 +8,6 @@ import de.borstelmann.doorbell.server.domain.repository.UserRepository;
 import de.borstelmann.doorbell.server.openapi.model.DoorbellRequest;
 import de.borstelmann.doorbell.server.openapi.model.DoorbellResponse;
 import de.borstelmann.doorbell.server.test.authentication.OAuthIntegrationTest;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -27,15 +26,9 @@ public class DoorbellControllerIntegrationTest extends OAuthIntegrationTest {
     @Autowired
     private DoorbellDeviceRepository doorbellDeviceRepository;
 
-    @AfterEach
-    void tearDown() {
-        doorbellDeviceRepository.deleteAll();
-        userRepository.deleteAll();
-    }
-
     @Test
     void testCreateDoorbell() throws Exception {
-        User user = createSampleUser();
+        User user = createSampleUserWithGoogleHomeConnected();
 
         DoorbellRequest doorbellRequest = new DoorbellRequest().name("name");
         String body = objectMapper.writeValueAsString(doorbellRequest);
@@ -65,7 +58,7 @@ public class DoorbellControllerIntegrationTest extends OAuthIntegrationTest {
 
     @Test
     void testGetAllDoorbells() throws Exception {
-        User user = createSampleUser();
+        User user = createSampleUserWithGoogleHomeConnected();
         createSampleDoorbellDevice(user);
 
         assertIsOkay(RequestUtils.createGetAllDoorbellsRequest(user.getId(), obtainToken()));
@@ -78,7 +71,7 @@ public class DoorbellControllerIntegrationTest extends OAuthIntegrationTest {
 
     @Test
     void testGetDoorbell() throws Exception {
-        User user = createSampleUser();
+        User user = createSampleUserWithGoogleHomeConnected();
 
         DoorbellDevice doorbell = DoorbellDevice.builder()
                 .name("Doorbell")
@@ -100,7 +93,7 @@ public class DoorbellControllerIntegrationTest extends OAuthIntegrationTest {
 
     @Test
     void testDeleteDoorbell() throws Exception {
-        User user = createSampleUser();
+        User user = createSampleUserWithGoogleHomeConnected();
         DoorbellDevice doorbell = createSampleDoorbellDevice(user);
 
         assertNoContent(RequestUtils.createDeleteDoorbellRequest(doorbell.getId(), obtainToken()));

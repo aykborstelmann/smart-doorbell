@@ -11,8 +11,11 @@ plugins {
     id 'java'
     id 'idea'
     id 'org.springframework.boot' version '2.6.4'
+    id "org.jsonschema2dataclass" version '4.3.1'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'org.openapi.generator' version '5.4.0'
+    id 'org.jetbrains.kotlin.jvm' version '1.6.20'
+    id 'org.jetbrains.kotlin.plugin.lombok' version '1.6.20'
 }
 
 ext {
@@ -36,6 +39,7 @@ dependencies {
     implementation 'org.springframework.security:spring-security-messaging'
 
     implementation 'com.google.actions:actions-on-google:1.8.0'
+    implementation 'com.google.apis:google-api-services-homegraph:v1-rev20220325-1.32.1'
     implementation 'io.swagger.core.v3:swagger-annotations:2.1.13'
     implementation 'org.openapitools:jackson-databind-nullable:0.2.2'
     implementation 'org.modelmapper:modelmapper:3.0.0'
@@ -53,6 +57,8 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'de.cronn:validation-file-assertions:0.2.0'
     testImplementation 'org.awaitility:awaitility:4.2.0'
+    testImplementation 'de.cronn:test-utils:0.3.0'
+    testImplementation 'com.squareup.okhttp3:mockwebserver'
 }
 
 dependencyManagement {
@@ -65,7 +71,7 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-final String OUTPUT_DIR = "$buildDir/generated".toString()
+final String OUTPUT_DIR = "$buildDir/generated/main".toString()
 
 sourceSets {
     main {
@@ -101,3 +107,16 @@ task codeGen(type: GenerateTask) {
 }
 
 compileJava.dependsOn(codeGen)
+
+jsonSchema2Pojo {
+    targetPackage = 'de.borstelmann.doorbell.server.googlehome.model' // specify package for your needs
+    source.setFrom files("${projectDir}/src/main/resources/google-home-schema/")
+    fileFilter = new FileFilter() {
+        @Override
+        boolean accept(File file) {
+            return file.isDirectory() || file.toString().endsWith(".json")
+        }
+    }
+    targetDirectoryPrefix = file("$buildDir/generated")
+    useTitleAsClassname = true
+}

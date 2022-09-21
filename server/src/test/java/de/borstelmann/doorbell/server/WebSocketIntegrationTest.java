@@ -1,6 +1,6 @@
 package de.borstelmann.doorbell.server;
 
-import de.borstelmann.doorbell.server.controller.RequestUtils;
+import de.borstelmann.doorbell.server.test.RequestUtils;
 import de.borstelmann.doorbell.server.domain.model.DoorbellDevice;
 import de.borstelmann.doorbell.server.domain.model.User;
 import de.borstelmann.doorbell.server.dto.OpenMessage;
@@ -42,20 +42,17 @@ public class WebSocketIntegrationTest extends OAuthIntegrationTest {
 
     @BeforeEach
     void setUp() throws InterruptedException, ExecutionException {
-        User sampleUser = createSampleUser();
+        User sampleUser = createSampleUserWithGoogleHomeConnected();
         sampleDoorbellDevice = createSampleDoorbellDevice(sampleUser);
         stompSession = getStompSessionWithLogin(String.valueOf(sampleDoorbellDevice.getId()));
     }
 
     @AfterEach
-    void tearDown() {
+    public void disconnectStompSession() {
         if (stompSession.isConnected()) {
             stompSession.disconnect();
             await().until(() -> !stompSession.isConnected());
         }
-
-        doorbellDeviceRepository.deleteAll();
-        userRepository.deleteAll();
     }
 
     @Test

@@ -4,7 +4,6 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.UUID;
 
 @Entity(name = "users")
 @Builder
@@ -23,5 +22,7 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<DoorbellDevice> doorbellDevices;
+
+    private boolean googleHomeConnected = false;
 
 }
